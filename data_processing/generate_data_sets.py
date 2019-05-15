@@ -138,6 +138,6 @@ def generate_data(dataset_struct):
 if (__name__ == '__main__'):
   import sys
   (training_files, validation_files, test_files) = split_files(sys.argv[1])
-  training_data = generate_data(training_data)
+  training_data = generate_data(training_files)
   validataion_data = generate_data(validation_files)
   test_data = generate_data(test_data)
