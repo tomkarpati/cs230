@@ -144,7 +144,6 @@ def read_dataset(name="data",
   fn = in_dir+"/"+name+".npy"
   assert(os.path.exists(fn))
   dataset = np.load(fn, allow_pickle=True)
-  print(dataset)
   return dataset
     
 if (__name__ == '__main__'):
