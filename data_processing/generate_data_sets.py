@@ -2,9 +2,19 @@ import numpy as np
 import re
 import os
 import glob
+import copy
 
 from scipy.io import wavfile
 
+def collect_stats(dataset):
+  print("Total classes: ", len(dataset))
+  size = 0
+  print("Breakdown of set:")
+  for k,v in dataset.items():
+    size += len(v)
+  for k,v in dataset.items():
+    print("  {}: {}".format(k, len(v)*100.0/size))
+      
 def split_files(data_dir,
                 verbose=False):
   """This splits the files into appropriate data sets for training, 
@@ -25,19 +35,6 @@ def split_files(data_dir,
 
     return d
 
-  def collect_stats(dataset):
-    size = len(dataset)
-    d = {}
-    # Generate a dictionary with all commands
-    for k in dataset.keys():
-      if k[0] in d.keys(): d[k[0]] += 1
-      else: d[k[0]] = 1
-
-    print("Breakdown of set:")
-    for k in d.keys():
-      d[k] /= size
-      print("  ", k, ": ", d[k])
-  
   pattern = {}
   pattern['dir'] = re.compile("(([^/]*)\/)*?([^/]+\.wav)")
   pattern['file'] = re.compile("([^_]+)_nohash_(\d+)\.wav")
@@ -89,13 +86,6 @@ def split_files(data_dir,
   print("  Validation set: ", len(validation_set))
   print("  Test set: ", len(test_set))
 
-  print("Training set statistics:")
-  collect_stats(training_set)
-  print("Validation set statistics:")
-  collect_stats(validation_set)
-  print("Test set statistics:")
-  collect_stats(test_set)
-
   return (training_set, validation_set, test_set)
 
 def generate_data(dataset_struct):
@@ -131,13 +121,45 @@ def generate_data(dataset_struct):
     d = {}
     d['filename'] = dataset_struct[k]
     d['class'] = k[0]
-    d['data'] = read_data_from_wav_file(d['filename'], verbose=True)
-    print(d)
+    d['data'] = read_data_from_wav_file(d['filename'])
+    if k[0] in examples.keys():
+      examples[k[0]].append(d)
+    else:
+      examples[k[0]] = [d]
     
+  collect_stats(examples)
   
+  return examples
+
+    
+def write_dataset(dataset,
+                  name="data",
+                  out_dir="."):
+  if not os.path.exists(out_dir):
+    os.makedirs(out_dir)
+  np.save(out_dir+"/"+name+".npy", dataset)
+
+def read_dataset(name="data",
+                 in_dir="."):
+  fn = in_dir+"/"+name+".npy"
+  assert(os.path.exists(fn))
+  dataset = np.load(fn, allow_pickle=True)
+  print(dataset)
+  return dataset
+    
 if (__name__ == '__main__'):
   import sys
   (training_files, validation_files, test_files) = split_files(sys.argv[1])
+  out_dir = sys.argv[2]
+  print("Generating validation data set...")
+  validation_data = generate_data(validation_files)
+  write_dataset(validation_data, "validation", out_dir)
+  print("Done.")
+  print("Generating test data set...")
+  test_data = generate_data(test_files)
+  write_dataset(test_data, "test", out_dir)
+  print("Done.")
+  print("Generating training data set...")
   training_data = generate_data(training_files)
-  validataion_data = generate_data(validation_files)
-  test_data = generate_data(test_data)
+  write_dataset(training_data, "training", out_dirg)
+  print("Done.")
