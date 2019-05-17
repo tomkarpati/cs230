@@ -7,13 +7,17 @@ import copy
 from scipy.io import wavfile
 
 def collect_stats(dataset):
-  print("Total classes: ", len(dataset))
-  size = 0
-  print("Breakdown of set:")
-  for k,v in dataset.items():
-    size += len(v)
-  for k,v in dataset.items():
-    print("  {}: {}".format(k, len(v)*100.0/size))
+  size = len(dataset)
+  print("Total samples: ", size)
+  d = {}
+  for example in dataset:
+    if example['class'] in d.keys():
+      d[example['class']] += 1
+    else:
+      d[example['class']] = 1
+  print("Breakdown of set (percentages of total samples):")
+  for k,v in d.items():
+    print("  {}: {}".format(k, v*100.0/size))
       
 def split_files(data_dir,
                 verbose=False):
@@ -22,18 +26,21 @@ def split_files(data_dir,
   The data directory looks like:
     <command>/<speaker_id>_nohash_<utternce_number>.wav"""
 
-  def convert_filelist_to_dict(filelist,
+  def convert_filelist_to_list(filelist,
                                pattern,
                                data_dir,
                                verbose=False):
-    d = {}
+    """Return a list of tuples:
+    [(label, filename), (...), ...]
+    """
+    l = []
     for f in filelist:
       ff = f.rstrip()
       r_dir = re.match(pattern['dir'], ff)
-      r_file = re.match(pattern['file'], r_dir.group(3))
-      d[(r_dir.group(2), r_file.group(1), r_file.group(2))] = data_dir + '/' + ff
+      fn = data_dir+'/'+ff
+      l.append((r_dir.group(2), fn))
 
-    return d
+    return l
 
   pattern = {}
   pattern['dir'] = re.compile("(([^/]*)\/)*?([^/]+\.wav)")
@@ -49,7 +56,7 @@ def split_files(data_dir,
   fp = open(data_dir+"validation_list.txt", "r")
   print ("Reading validation samples from:", fp.name)
   validation_filelist = fp.readlines()
-  validation_set = convert_filelist_to_dict(validation_filelist,
+  validation_set = convert_filelist_to_list(validation_filelist,
                                             pattern,
                                             data_dir,
                                             verbose)
@@ -57,29 +64,19 @@ def split_files(data_dir,
   fp = open(data_dir+"testing_list.txt", "r")
   print ("Reading test samples from:", fp.name)
   test_filelist = fp.readlines()
-  test_set = convert_filelist_to_dict(test_filelist,
+  test_set = convert_filelist_to_list(test_filelist,
                                       pattern,
                                       data_dir,
                                       verbose)
   fp.close()
 
   # Figure out what's in the training set
-  training_set = {}
+  training_set = []
   for f in filelist:
     r_dir = re.match(pattern['dir'], f)
-    if (r_dir.group(2) == "_background_noise_"):
-      r_file = re.match("(.+)\.wav", r_dir.group(3))
-      t = (r_dir.group(2), r_file.group(1))
-      if verbose: print (t)
-      training_set[t] = f
-    else:
-      r_file = re.match(pattern['file'], r_dir.group(3))
-      t = (r_dir.group(2), r_file.group(1), r_file.group(2))
-      if ((t not in validation_set) and
-          (t not in test_set)):
-        if verbose: print (t)
-        training_set[t] = f
-      
+    t = (r_dir.group(2), f)
+    if verbose: print (t)
+    training_set.append(t)
       
   print("This is our data splits:")
   print("  Training set: ", len(training_set))
@@ -88,7 +85,7 @@ def split_files(data_dir,
 
   return (training_set, validation_set, test_set)
 
-def generate_data(dataset_struct):
+def generate_data(dataset_list):
   """Convert the dataset structure to a data.
   Returns a dictionary that looks like:
   dict['filename'] filename string
@@ -102,7 +99,6 @@ def generate_data(dataset_struct):
     May perform any necessary processing.
     """
   
-    d = {}
     # Read the file
     rate, data = wavfile.read(filename)
     dmin = min(data)
@@ -116,34 +112,34 @@ def generate_data(dataset_struct):
     data = data.astype(np.float32) / np.iinfo(np.int16).max
     return data
 
-  examples = {}
-  for k in dataset_struct.keys():
+  examples = []
+  for k in dataset_list:
     d = {}
-    d['filename'] = dataset_struct[k]
+    d['filename'] = k[1]
     d['class'] = k[0]
     d['data'] = read_data_from_wav_file(d['filename'])
-    if k[0] in examples.keys():
-      examples[k[0]].append(d)
-    else:
-      examples[k[0]] = [d]
+    examples.append(d)
     
   collect_stats(examples)
   
   return examples
 
-    
 def write_dataset(dataset,
                   name="data",
                   out_dir="."):
-  if not os.path.exists(out_dir):
-    os.makedirs(out_dir)
+  fn = out_dir+"/"+name+".npy"
+  print("Writing dataset to", fn)
+  os.makedirs(out_dir, exist_ok=True)
   np.save(out_dir+"/"+name+".npy", dataset)
+  print("Done.")
 
 def read_dataset(name="data",
                  in_dir="."):
   fn = in_dir+"/"+name+".npy"
+  print("Reading dataset from", fn)
   assert(os.path.exists(fn))
   dataset = np.load(fn, allow_pickle=True)
+  print("Done.")
   return dataset
     
 if (__name__ == '__main__'):
@@ -160,5 +156,5 @@ if (__name__ == '__main__'):
   print("Done.")
   print("Generating training data set...")
   training_data = generate_data(training_files)
-  write_dataset(training_data, "training", out_dirg)
+  write_dataset(training_data, "training", out_dir)
   print("Done.")
