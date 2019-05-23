@@ -212,6 +212,7 @@ def test(run_config,
 
   test_input_fn = generator_input_fn(
       x=data_generator(test_data, hparams, 'test'),
+      target_key='target',
       batch_size=hparams.batch_size, 
       shuffle=False, 
       num_epochs=1,
@@ -220,14 +221,6 @@ def test(run_config,
   )
 
   model = create_model(config=run_config, hparams=hparams)
-  it = model.predict(input_fn=test_input_fn)
+  print("Starting to evaluate model.")
+  return model.evaluate(input_fn=test_input_fn, steps=100)
 
-  correct = 0
-  total = 0
-  for pred_dict in tqdm.tqdm(it):
-    fname, target, label  = pred_dict['fname'].decode(), id2name[pred_dict['target']], id2name[pred_dict['label']]
-    total += 1
-    if target == label: correct += 1
-    #else: print(fname, target, label)
-
-  print ("Accuracy: {} [{}/{}]".format((correct/total), correct, total))
