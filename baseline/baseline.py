@@ -1,3 +1,7 @@
+# This is mostly taken from
+# https://www.kaggle.com/alexozerin/end-to-end-baseline-tf-estimator-lb-0-72
+
+
 import os
 import numpy as np
 import tensorflow as tf
