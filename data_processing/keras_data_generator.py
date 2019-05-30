@@ -3,7 +3,9 @@ import numpy as np
 import tensorflow as tf
 import tensorflow.keras.utils
 import tensorflow.keras.preprocessing.sequence
-from scipy.signal import stft
+from scipy.signal import spectrogram
+
+import matplotlib.pyplot as plt
 
 from data_processing import generate_data_sets
 
@@ -16,9 +18,23 @@ MAX_SAMPLES = 16000
 ID2LABEL = {i: name for i, name in enumerate(LABELS)}
 LABEL2ID = {name: i for i, name in ID2LABEL.items()}
 
+def visualize_spectrogram(data_sequence, batch, index):
+  x,y = data_sequence.__getitem__(batch)
+  print("Current sample: ", ID2LABEL(np.argmax(y[index])))
+  plt.pcolormesh(x[index,:,:,0])
+  plt.show()
+
 def sanitize_spectrogram_params(spectrogram_params):
   if not spectrogram_params:
-    spectrogram_params = { 'length': 400, 'step': 160 }
+    spectrogram_params = { 'window_length': 512,
+                           'window_step': 160,
+                           'fft_length': 512}
+  # Determine any second order parameters we need
+  if not spectrogram_params['fft_length']:
+    # We need to compute the power 2 length (pad as required)
+    spectrograam_params['fft_length'] = (2 ** int(no.ceil(math.log(spectrogram_params['window_length'],2))))
+
+  print('Spectrogram Paramaeters: ', spectrogram_params)
   return spectrogram_params
 
 def get_num_classes():
@@ -29,9 +45,11 @@ def get_input_shape(hparams):
     sg_params = sanitize_spectrogram_params(hparams['spectrogram_params'])
     # return the expected shape for the input data
     shape=[0, 0, 0]
-    shape[0] = int(np.ceil((MAX_SAMPLES - sg_params['length']) / sg_params['step']))
-    shape[1] = (2 ** int(np.ceil(math.log(sg_params['length'],2)))) // 2 + 1
-    shape[2] = 2 # This is the phase and amplitude
+    # shape[0] is the result of the computation (one sided)
+    shape[0] = sg_params['fft_length'] // 2 + 1
+    # shape[1] is the number of segments we compute
+    shape[1] = int(np.ceil((MAX_SAMPLES - sg_params['window_length']) / sg_params['window_step']))
+    shape[2] = 1 # one channel
     return shape
   else:
     return [MAX_SAMPLES]
@@ -50,15 +68,21 @@ class DataSequence(tensorflow.keras.utils.Sequence):
     assert(len(LABELS) == hparams['num_classes'])
     print ("Building data model...", end='', flush=True)
     if shuffle: np.random.shuffle(dataset)
+    self.dataset = dataset
     self.hparams = hparams
+    self.verbose = verbose
+
+    # Compute the spectrogram parameters
+    self.spectrogram_params = sanitize_spectrogram_params(self.hparams['spectrogram_params'])
+
     # The data is stored as a list of WAV samples
     # Create a list of lists of samples, which we'll convert
     # into a single array for data.
     # Turn this into a nparray
     X_list = []
     idx = 0
-    self.Y = np.zeros([len(dataset), len(LABELS)])
-    for example in dataset:
+    self.Y = np.zeros([len(self.dataset), len(LABELS)])
+    for example in self.dataset:
         X_list.append(example['data'])
         #print(X_list)
         label = example['class']
@@ -71,25 +95,10 @@ class DataSequence(tensorflow.keras.utils.Sequence):
                                                                    dtype='float32',
                                                                    padding='pre',
                                                                    truncating='post')
-    if self.hparams['gen_spectrogram']:
-      spectrogram_params = sanitize_spectrogram_params(self.hparams['spectrogram_params'])
-      
-      print("Generating stft for {} examples".format(len(self.X)))
-      spectrogram = tf.signal.stft(self.X,
-                                   frame_length=spectrogram_params['length'],
-                                   frame_step=spectrogram_params['step'],
-                                   name='spectrogram')
-      phase = tf.angle(spectrogram) / np.pi
-      amp = tf.log1p(tf.abs(spectrogram))
-      
-      x = tf.stack([amp, phase], axis=3)
-      x = tf.cast(x, tf.float32)
-      self.X = x
-
-    assert(np.shape(x)[1:] == self.hparams['input_shape'])
     print('Done.')
-    print("Generated sample array of shape:", np.shape(self.X))
-    print("Generated label array of shape:", np.shape(self.Y))
+    if self.verbose:
+      print("Generated sample array of shape:", np.shape(self.X))
+      print("Generated label array of shape:", np.shape(self.Y))
 
   def input_shape(self):
       return np.shape(self.X)
@@ -98,12 +107,32 @@ class DataSequence(tensorflow.keras.utils.Sequence):
       return np.shape(self.Y)
     
   def __len__(self):
-    num_samples = int(np.shape(self.X)[0])
-    return 5 #int(np.ceil(num_samples / self.hparams['batch_size']))
+    #num_samples = int(np.shape(self.X)[0])
+    #return int(np.ceil(num_samples / self.hparams['batch_size']))
+    return 1
 
   def __getitem__(self, idx):
     select = np.array([idx, idx + 1]) * self.hparams['batch_size']
     x = self.X[select[0]:select[1]]
+
+    if self.hparams['gen_spectrogram']:
+      
+      if self.verbose: print("Generating spectrogram for {} examples".format(len(x)))
+      p = self.spectrogram_params
+      f, t, s = spectrogram(x,
+                            nperseg=p['window_length'],
+                            noverlap=p['window_length'] - p['window_step'],
+                            scaling='spectrum',
+                            mode='magnitude',
+      )
+      x = s
+      # Extend this by one dimension so that the conv2d layer has 4 dimensions
+      x = np.expand_dims(x, axis=3)
+      if self.verbose:
+        print (np.shape(x)[1:])
+        print (self.hparams['input_shape'])
+
+    #assert(np.shape(x)[1:] == self.hparams['input_shape'])
     y = self.Y[select[0]:select[1]]
 
     return x,y

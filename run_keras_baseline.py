@@ -16,6 +16,7 @@ print("Using TensorFlow version:", tf.__version__)
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-v", "--verbose", help="Verbose output", action="store_true")
+parser.add_argument("-i", "--interactive", help="Load data and models and exit", action="store_true")
 parser.add_argument("-data_dir", help="Input data location", default="./data")
 parser.add_argument("-model_dir", help="Output data file location", default="./model")
 args = parser.parse_args()
@@ -25,7 +26,6 @@ hparams = {
     'keep_prob': 0.5,
     'batch_norm': True,
     'epochs': 10,
-    'validation_steps': 200,
     'gen_spectrogram': True,
     'spectrogram_params': None,
     'loss': 'categorical_crossentropy',
@@ -44,16 +44,16 @@ print(hparams)
 
 
 # Use the project data processing directives
-#training_data = generate_data_sets.read_dataset(name="training",
-#                                                in_dir=args.data_dir)
+training_data = generate_data_sets.read_dataset(name="training",
+                                                in_dir=args.data_dir)
 validation_data = generate_data_sets.read_dataset(name="validation",
                                                   in_dir=args.data_dir)
 test_data = generate_data_sets.read_dataset(name="test",
                                             in_dir=args.data_dir)
 
-#training_sequence = keras_data_generator.DataSequence(training_data,
-#                                                      hparams=hparams,
-#                                                      shuffle=True)
+training_sequence = keras_data_generator.DataSequence(training_data,
+                                                      hparams=hparams,
+                                                      shuffle=True)
 validation_sequence = keras_data_generator.DataSequence(validation_data,
                                                         hparams=hparams,
                                                         shuffle=False)
@@ -65,8 +65,11 @@ test_sequence = keras_data_generator.DataSequence(test_data,
 baseline_model = baseline.BaselineModel(hparams,
                                model_dir=args.model_dir,
                                verbose=args.verbose)
+
+if args.interactive: exit()
+
 print("Starting training....")
-history = baseline_model.train(validation_sequence,
-                               test_sequence,
+history = baseline_model.train(training_sequence,
+                               validation_sequence,
                                verbose=True)
-                     
+print("Done.")

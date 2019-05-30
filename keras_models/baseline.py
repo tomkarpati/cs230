@@ -17,7 +17,7 @@ class BaselineModel:
     self.verbose = verbose
     self.model_dir = model_dir
     
-    X_in = tf.keras.layers.Input(shape=self.hparams['input_shape'])
+    X_in = tf.keras.layers.Input(shape=self.hparams['input_shape'], name='input')
     x = tf.keras.layers.BatchNormalization()(X_in)
     # Repeat 4 times
     for i in range(4):
@@ -28,6 +28,7 @@ class BaselineModel:
                                  strides=1,
                                  use_bias=False,
                                  activation=None,
+                                 padding='same',
                                  name='conv2d_h{}'.format(i))(x)
       # Run batch normalization per conv layer before activation
       x = tf.keras.layers.BatchNormalization()(x)
@@ -37,8 +38,8 @@ class BaselineModel:
                                        padding='same',
                                        name='max_pool_h{}'.format(i))(x)
 
-    # Pool out the entire dimensions into channels
-    x = tf.keras.layers.GlobalAveragePooling2D()(x)
+    # Flatten out the convolution layers
+    x = tf.keras.layers.Flatten()(x)
     # Dense layer
     x = tf.keras.layers.Dense(128,
                               name='dense')(x)
@@ -74,8 +75,8 @@ class BaselineModel:
     path = self.model_dir+'/tensorboard'
     os.makedirs(path, exist_ok=True)
     self.callbacks.append(tf.keras.callbacks.TensorBoard(log_dir=path,
-                                                         histogram_freq=2,
-                                                         update_freq='epoch'))
+                                                         histogram_freq=100,
+                                                         update_freq=100))
     print (self.callbacks)
 
   def train(self,
