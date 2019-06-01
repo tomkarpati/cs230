@@ -5,8 +5,6 @@ import tensorflow.keras.utils
 import tensorflow.keras.preprocessing.sequence
 from scipy.signal import spectrogram
 
-import matplotlib.pyplot as plt
-
 from data_processing import generate_data_sets
 
 # Build this in Keras
@@ -18,12 +16,6 @@ MAX_SAMPLES = 16000
 ID2LABEL = {i: name for i, name in enumerate(LABELS)}
 LABEL2ID = {name: i for i, name in ID2LABEL.items()}
 
-def visualize_spectrogram(data_sequence, batch, index):
-  x,y = data_sequence.__getitem__(batch)
-  print("Current sample: ", ID2LABEL(np.argmax(y[index])))
-  plt.pcolormesh(x[index,:,:,0])
-  plt.show()
-
 def sanitize_spectrogram_params(spectrogram_params):
   if not spectrogram_params:
     spectrogram_params = { 'window_length': 512,
@@ -34,7 +26,7 @@ def sanitize_spectrogram_params(spectrogram_params):
     # We need to compute the power 2 length (pad as required)
     spectrograam_params['fft_length'] = (2 ** int(no.ceil(math.log(spectrogram_params['window_length'],2))))
 
-  print('Spectrogram Paramaeters: ', spectrogram_params)
+  print('Spectrogram Parameters: ', spectrogram_params)
   return spectrogram_params
 
 def get_num_classes():
@@ -84,7 +76,6 @@ class DataSequence(tensorflow.keras.utils.Sequence):
     self.Y = np.zeros([len(self.dataset), len(LABELS)])
     for example in self.dataset:
         X_list.append(example['data'])
-        #print(X_list)
         label = example['class']
         if label not in LABELS: label = 'unknown'
         self.Y[idx, LABEL2ID[label]] = 1  # generate one-hot representation
@@ -107,9 +98,8 @@ class DataSequence(tensorflow.keras.utils.Sequence):
       return np.shape(self.Y)
     
   def __len__(self):
-    #num_samples = int(np.shape(self.X)[0])
-    #return int(np.ceil(num_samples / self.hparams['batch_size']))
-    return 1
+    num_samples = int(np.shape(self.X)[0])
+    return int(np.ceil(num_samples / self.hparams['batch_size']))
 
   def __getitem__(self, idx):
     select = np.array([idx, idx + 1]) * self.hparams['batch_size']
@@ -126,8 +116,9 @@ class DataSequence(tensorflow.keras.utils.Sequence):
                             mode='magnitude',
       )
       x = s
-      # Extend this by one dimension so that the conv2d layer has 4 dimensions
-      x = np.expand_dims(x, axis=3)
+      if self.hparams['use_conv2d']:
+        # Extend this by one dimension so that the conv2d layer has 4 dimensions
+        x = np.expand_dims(x, axis=3)
       if self.verbose:
         print (np.shape(x)[1:])
         print (self.hparams['input_shape'])
