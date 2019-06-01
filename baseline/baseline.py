@@ -10,10 +10,22 @@ from tensorflow.contrib import signal
 from tensorflow.contrib.learn.python.learn.learn_io.generator_io import generator_input_fn
 import tqdm
 
+import logging
+
 POSSIBLE_LABELS = 'yes no up down left right on off stop go silence unknown'.split()
 id2name = {i: name for i, name in enumerate(POSSIBLE_LABELS)}
 name2id = {name: i for i, name in id2name.items()}
 WAVE_SAMPLES = 16000 # expected length of example
+
+def dump_hyperparameters(model_dir, hparams):
+  # Dump hyperparameter information
+  print("Hyperparameters: ")
+  print(hparams)
+  path = model_dir+'/hyperparameters'
+  os.makedirs(path, exist_ok=True)
+  f = open(path+"/parameters.txt","w")
+  f.write(str(hparams))
+  f.close()
 
 def data_generator(data,
                    params,
@@ -166,11 +178,16 @@ def baseline(out_dir="."):
       clip_gradients=15.0,
       use_batch_norm=True,
       num_classes=len(POSSIBLE_LABELS),
+      multiprocess=False,
   )
 
   hparams = tf.contrib.training.HParams(**params)
   os.makedirs(os.path.join(out_dir, 'eval'), exist_ok=True)
   model_dir = out_dir
+
+  dump_hyperparameters(model_dir, hparams)
+
+  logging.getLogger().setLevel(logging.INFO)
 
   run_config = tf.contrib.learn.RunConfig(model_dir=model_dir)
   return run_config, hparams
@@ -225,6 +242,5 @@ def test(run_config,
   )
 
   model = create_model(config=run_config, hparams=hparams)
-  print("Starting to evaluate model.")
   return model.evaluate(input_fn=test_input_fn, steps=100)
 
