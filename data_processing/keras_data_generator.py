@@ -36,12 +36,11 @@ def get_input_shape(hparams):
   if hparams['gen_spectrogram']:
     sg_params = sanitize_spectrogram_params(hparams['spectrogram_params'])
     # return the expected shape for the input data
-    shape=[0, 0, 0]
+    shape=[0, 0]
     # shape[0] is the result of the computation (one sided)
     shape[0] = sg_params['fft_length'] // 2 + 1
     # shape[1] is the number of segments we compute
     shape[1] = int(np.ceil((MAX_SAMPLES - sg_params['window_length']) / sg_params['window_step']))
-    shape[2] = 1 # one channel
     return shape
   else:
     return [MAX_SAMPLES]
@@ -80,7 +79,7 @@ class DataSequence(tensorflow.keras.utils.Sequence):
         if label not in LABELS: label = 'unknown'
         self.Y[idx, LABEL2ID[label]] = 1  # generate one-hot representation
         idx += 1
-        if verbose: print(".", end="", flush=True)
+        if (idx % 100) and verbose: print(".", end="", flush=True)
     self.X = tensorflow.keras.preprocessing.sequence.pad_sequences(X_list,
                                                                    maxlen=MAX_SAMPLES,
                                                                    dtype='float32',
@@ -116,9 +115,7 @@ class DataSequence(tensorflow.keras.utils.Sequence):
                             mode='magnitude',
       )
       x = s
-      if self.hparams['use_conv2d']:
-        # Extend this by one dimension so that the conv2d layer has 4 dimensions
-        x = np.expand_dims(x, axis=3)
+
       if self.verbose:
         print (np.shape(x)[1:])
         print (self.hparams['input_shape'])
