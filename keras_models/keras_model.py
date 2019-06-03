@@ -79,7 +79,7 @@ class KerasModel:
     return self.model.evaluate_generator(generator=test_sequence,
                                          steps=None,
                                          verbose=2,
-                                         workers=self.hparas['threads'],
+                                         workers=self.hparams['threads'],
                                          use_multiprocessing=self.hparams['multiprocess'])
 
   def dump_info(self):
