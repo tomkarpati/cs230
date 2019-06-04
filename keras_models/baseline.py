@@ -13,8 +13,8 @@ class BaselineModel(keras_model.KerasModel):
     super().__init__(hparams, model_dir, verbose)
     
     X_in = tf.keras.layers.Input(shape=self.hparams['input_shape'], name='input')
-    if self.hparams['batch_norm']: x = tf.keras.layers.BatchNormalization()(X_in)
-    else: x = X_in
+    x = tf.keras.layers.Lambda(lambda x : tf.expand_dims(x, axis=3))(X_in)
+    if self.hparams['batch_norm']: x = tf.keras.layers.BatchNormalization()(x)
     
     # Repeat 4 times
     for i in range(4):
