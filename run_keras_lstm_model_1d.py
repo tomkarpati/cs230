@@ -28,12 +28,10 @@ args = parser.parse_args()
 
 hparams = {
     'batch_size': 64,
-    #'keep_prob': 0.5,
-    #'batch_norm': True,
     'keep_prob': 1.0,
-    'batch_norm': False,
-    'num_conv_layers': 1,
-    'num_lstm_hidden_layers': 0,
+    'batch_norm': True,
+    'num_conv_layers': 2,
+    'num_lstm_hidden_layers': 1,
     'epochs': 10,
     'gen_spectrogram': True,
     'spectrogram_params': None,
