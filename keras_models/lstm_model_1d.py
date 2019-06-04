@@ -39,10 +39,10 @@ class LstmModel1D(keras_model.KerasModel):
     # LSTM layer
     for i in range(self.hparams['num_lstm_hidden_layers']):
       # Call lstm layer multiple times as needed
-      x = tf.keras.layers.LSTM(128,
+      x = tf.keras.layers.CuDNNLSTM(128,
                                name='lstm_h{}'.format(i))(x)
       
-    x = tf.keras.layers.LSTM(128,
+    x = tf.keras.layers.CuDNNLSTM(128,
                              name='lstm')(x)
     
     # Get the logits for softmax output
