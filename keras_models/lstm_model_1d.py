@@ -40,10 +40,13 @@ class LstmModel1D(keras_model.KerasModel):
     for i in range(self.hparams['num_lstm_hidden_layers']):
       # Call lstm layer multiple times as needed
       x = tf.keras.layers.CuDNNLSTM(128,
+                               return_sequences=True,
                                name='lstm_h{}'.format(i))(x)
+      if self.hparams['batch_norm']: x = tf.keras.layers.BatchNormalization()(x)
       
     x = tf.keras.layers.CuDNNLSTM(128,
                              name='lstm')(x)
+    if self.hparams['batch_norm']: x = tf.keras.layers.BatchNormalization()(x)
     
     # Get the logits for softmax output
     logits = tf.keras.layers.Dense(self.hparams['num_classes'],
