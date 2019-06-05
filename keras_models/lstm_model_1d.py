@@ -15,6 +15,19 @@ class LstmModel1D(keras_model.KerasModel):
     # reshape and squeeze this to be [num_samples, sequence, features]
     def lstm_reshape_layer(x):
       return tf.transpose(x, perm=[0, 2, 1])
+
+    def lstm_layer(x,
+                   num_nodes,
+                   return_sequences=False,
+                   name='lstm'):
+      if self.hparams['has_gpu']:
+        return tf.keras.layers.CuDNNLSTM(num_nodes,
+                                         return_sequences=return_sequences,
+                                         name=name)(x)
+      else:
+        return tf.keras.layers.LSTM(num_nodes,
+                                    return_sequences=return_sequences,
+                                    name=name)(x)
     
     X_in = tf.keras.layers.Input(shape=self.hparams['input_shape'], name='input')
     x = tf.keras.layers.Lambda(lstm_reshape_layer)(X_in)
@@ -39,13 +52,15 @@ class LstmModel1D(keras_model.KerasModel):
     # LSTM layer
     for i in range(self.hparams['num_lstm_hidden_layers']):
       # Call lstm layer multiple times as needed
-      x = tf.keras.layers.CuDNNLSTM(128,
-                               return_sequences=True,
-                               name='lstm_h{}'.format(i))(x)
+      x = lstm_layer(x,
+                     num_nodes=128,
+                     return_sequences=True,
+                     name='lstm_h{}'.format(i))
       if self.hparams['batch_norm']: x = tf.keras.layers.BatchNormalization()(x)
       
-    x = tf.keras.layers.CuDNNLSTM(128,
-                             name='lstm')(x)
+    x = lstm_layer(x,
+                   num_nodes=128,
+                   name='lstm')
     if self.hparams['batch_norm']: x = tf.keras.layers.BatchNormalization()(x)
     
     # Get the logits for softmax output

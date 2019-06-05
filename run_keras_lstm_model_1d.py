@@ -27,18 +27,21 @@ parser.add_argument("-model_dir", help="Output data file location", default="./m
 args = parser.parse_args()
 
 hparams = {
-    'batch_size': 64,
-    'keep_prob': 1.0,
-    'batch_norm': True,
-    'num_conv_layers': 2,
-    'num_lstm_hidden_layers': 1,
-    'epochs': 10,
-    'gen_spectrogram': True,
-    'spectrogram_params': None,
-    'loss': 'categorical_crossentropy',
-    'optimizer': 'adam',
-    'multiprocess': False,
-    'threads': 1,
+  'seed': 5037,
+  'batch_size': 64,
+  'keep_prob': 0.5,
+  'dropout' : True,
+  'batch_norm': True,
+  'num_conv_layers': 2,
+  'num_lstm_hidden_layers': 1,
+  'epochs': 10,
+  'gen_spectrogram': True,
+  'spectrogram_params': None,
+  'loss': 'categorical_crossentropy',
+  'optimizer': 'adam',
+  'has_gpu': tf.test.is_gpu_available(cuda_only=True),
+  'multiprocess': False,
+  'threads': 1,
 }
 
 
