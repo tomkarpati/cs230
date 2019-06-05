@@ -84,9 +84,9 @@ if args.fast:
 
 # Create the model and compile
 utils.log_timestamp()
-model = lstm_model_1d.LstmModel1D(hparams,
-                                  model_dir=args.model_dir,
-                                  verbose=args.verbose)
+model = lstm_model_1d.LstmModel(hparams,
+                                model_dir=args.model_dir,
+                                verbose=args.verbose)
 
 if args.interactive: exit()
 
