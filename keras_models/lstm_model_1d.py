@@ -26,8 +26,8 @@ class LstmModel1D(keras_model.KerasModel):
       # This trains single kernel over all frequencies
       nfilters = 16 * (2 ** i)
       x = tf.keras.layers.Conv1D(filters=nfilters,
-                                 kernel_size=3,
-                                 strides=1,
+                                 kernel_size=self.hparams['kernel_size'][i],
+                                 strides=self.hparams['kernel_stride'][i],
                                  use_bias=False,
                                  activation=None,
                                  padding='same',
