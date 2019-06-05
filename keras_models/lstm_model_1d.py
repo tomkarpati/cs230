@@ -48,6 +48,8 @@ class LstmModel1D(keras_model.KerasModel):
       # Run batch normalization per conv layer before activation
       if self.hparams['batch_norm']: x = tf.keras.layers.BatchNormalization()(x)
       x = tf.keras.layers.Activation('relu')(x)
+      if self.hparams['dropout']: x = tf.keras.layers.Dropout(rate=1-self.hparams['keep_prob'],
+                                                              seed=self.hparams['seed'])(x)
 
     # LSTM layer
     for i in range(self.hparams['num_lstm_hidden_layers']):
@@ -57,11 +59,15 @@ class LstmModel1D(keras_model.KerasModel):
                      return_sequences=True,
                      name='lstm_h{}'.format(i))
       if self.hparams['batch_norm']: x = tf.keras.layers.BatchNormalization()(x)
+      if self.hparams['dropout']: x = tf.keras.layers.Dropout(rate=1-self.hparams['keep_prob'],
+                                                              seed=self.hparams['seed'])(x)
       
     x = lstm_layer(x,
                    num_nodes=128,
                    name='lstm')
     if self.hparams['batch_norm']: x = tf.keras.layers.BatchNormalization()(x)
+    if self.hparams['dropout']: x = tf.keras.layers.Dropout(rate=1-self.hparams['keep_prob'],
+                                                            seed=self.hparams['seed'])(x)
     
     # Get the logits for softmax output
     logits = tf.keras.layers.Dense(self.hparams['num_classes'],
