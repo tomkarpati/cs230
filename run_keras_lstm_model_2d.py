@@ -9,7 +9,7 @@ from data_processing import generate_data_sets
 from data_processing import keras_data_generator
 from data_processing import utils
 
-from keras_models import lstm_model_1d
+from keras_models import lstm_model_2d
 
 print("Using python version:", sys.version)
 print("Using numpy version:", np.__version__)
@@ -33,10 +33,13 @@ hparams = {
   'dropout' : True,
   'batch_norm': True,
   'num_conv_layers': 2,
-  'num_lstm_hidden_layers': 0,
+  'num_lstm_hidden_layers': 2,
   'kernel_size': [3, 3],
   'kernel_stride': [1, 1],
-  'epochs': 20,
+  'lstm_features': 128,
+  'conv1d_kernel_size': 3,
+  'conv1d_kernel_stride': 1,
+  'epochs': 2,
   'gen_spectrogram': True,
   'spectrogram_params': None,
   'loss': 'categorical_crossentropy',
@@ -84,7 +87,7 @@ if args.fast:
 
 # Create the model and compile
 utils.log_timestamp()
-model = lstm_model_1d.LstmModel(hparams,
+model = lstm_model_2d.LstmModel(hparams,
                                 model_dir=args.model_dir,
                                 verbose=args.verbose)
 
