@@ -3,7 +3,7 @@ import tensorflow as tf
 from keras_models import keras_model
 
 # Implement baseline in Keras
-class LstmModel1D(keras_model.KerasModel):
+class LstmModel(keras_model.KerasModel):
     
   def __init__(self,
                hparams,
@@ -12,10 +12,11 @@ class LstmModel1D(keras_model.KerasModel):
 
     super().__init__(hparams, model_dir, verbose)
 
-    # reshape and squeeze this to be [num_samples, sequence, features]
-    def lstm_reshape_layer(x):
+    # reshape this to be [num_samples, sequence, features]
+    def lstm_transpose_layer(x):
       return tf.transpose(x, perm=[0, 2, 1])
 
+    # Define the standard vs CuDNNLSTM dependent on GPU availability
     def lstm_layer(x,
                    num_nodes,
                    return_sequences=False,
@@ -30,10 +31,10 @@ class LstmModel1D(keras_model.KerasModel):
                                     name=name)(x)
     
     X_in = tf.keras.layers.Input(shape=self.hparams['input_shape'], name='input')
-    x = tf.keras.layers.Lambda(lstm_reshape_layer)(X_in)
+    x = tf.keras.layers.Lambda(lstm_transpose_layer)(X_in)
     if self.hparams['batch_norm']: x = tf.keras.layers.BatchNormalization()(x)
     
-    # Repeat 4 times
+    # Repeat n times
     for i in range(self.hparams['num_conv_layers']):
       # Call conv1d (we have powers of 2 increase each iteration)
       # This trains single kernel over all frequencies
