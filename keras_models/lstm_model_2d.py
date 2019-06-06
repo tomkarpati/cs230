@@ -72,7 +72,7 @@ class LstmModel(keras_model.KerasModel):
     for i in range(self.hparams['num_lstm_hidden_layers']):
       # Call lstm layer multiple times as needed
       x = lstm_layer(x,
-                     num_nodes=128,
+                     num_nodes=self.hparams['lstm_features'],
                      return_sequences=True,
                      name='lstm_h{}'.format(i))
       if self.hparams['batch_norm']: x = tf.keras.layers.BatchNormalization()(x)
@@ -80,7 +80,7 @@ class LstmModel(keras_model.KerasModel):
                                                               seed=self.hparams['seed'])(x)
       
     x = lstm_layer(x,
-                   num_nodes=128,
+                   num_nodes=self.hparams['lstm_features'],
                    name='lstm')
     if self.hparams['batch_norm']: x = tf.keras.layers.BatchNormalization()(x)
     if self.hparams['dropout']: x = tf.keras.layers.Dropout(rate=1-self.hparams['keep_prob'],
