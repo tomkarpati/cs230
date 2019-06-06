@@ -67,9 +67,11 @@ class KerasModel:
     print (self.callbacks)
 
     if self.hparams['optimizer'] == 'adam':
-      self.optimizer = tf.keras.optimizers.Adam(lr=self.hparams['lr'],
-                                                decay=self.hparams['lr_decay'])
-
+      if 'lr' in self.hparams.keys():
+        self.optimizer = tf.keras.optimizers.Adam(lr=self.hparams['lr'],
+                                                  decay=self.hparams['lr_decay'])
+      else:
+        self.optimizer = tf.keras.optimizers.Adam()
     
   def compile(self):
     self.model.compile(loss=self.hparams['loss'],
