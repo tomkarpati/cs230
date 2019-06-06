@@ -9,6 +9,7 @@ from data_processing import generate_data_sets
 from data_processing import keras_data_generator
 from data_processing import utils
 
+from keras_models import keras_model
 from keras_models import lstm_model_2d
 
 print("Using python version:", sys.version)
@@ -26,32 +27,12 @@ parser.add_argument("-data_dir", help="Input data location", default="./data")
 parser.add_argument("-model_dir", help="Output data file location", default="./model")
 args = parser.parse_args()
 
-hparams = {
-  'seed': 5037,
-  'batch_size': 64,
-  'keep_prob': 0.7,
-  'dropout' : True,
-  'batch_norm': True,
-  'num_conv_layers': 2,
-  'num_lstm_hidden_layers': 2,
-  'kernel_size': [3, 3],
-  'kernel_stride': [1, 1],
-  'lstm_features': 128,
-  'conv1d_kernel_size': 3,
-  'conv1d_kernel_stride': 1,
-  'epochs': 2,
-  'gen_spectrogram': True,
-  'spectrogram_params': None,
-  'loss': 'categorical_crossentropy',
-  'optimizer': 'adam',
-  #'lr': 0.001,
-  #'lr_decay': 0.0,
-  'has_gpu': tf.test.is_gpu_available(cuda_only=True),
-  'multiprocess': False,
-  'threads': 1,
-}
-
-
+# Get the default parameters and override as needed
+hparams = keras_model.get_default_hyperparameters()
+hparams['dropout'] = True
+hparams['epochs'] = 2
+#hparams['lr'] = 0.001
+#hparams['lr_decay'] = 0.001
 # Get the information about the input data shape and the number of classes from
 # the data. This will get passed to the model when we generate it.
 hparams['input_shape'] = keras_data_generator.get_input_shape(hparams)

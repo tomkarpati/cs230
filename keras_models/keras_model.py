@@ -5,6 +5,7 @@ import tensorflow as tf
 
 import json
 
+
 # Override the tensorboard callback to dump out our learning rate
 class LRTensorBoard(tf.keras.callbacks.TensorBoard):
   def __init__(self, log_dir):  # add other arguments to __init__ if you need
@@ -13,7 +14,32 @@ class LRTensorBoard(tf.keras.callbacks.TensorBoard):
   def on_epoch_end(self, epoch, logs=None):
     logs.update({'lr': tf.keras.backend.eval(self.model.optimizer.lr)})
     super().on_epoch_end(epoch, logs)
-        
+
+
+def get_default_hyperparameters():
+  return {
+    'seed': 5037,
+    'batch_size': 64,
+    'keep_prob': 0.7,
+    'dropout' : False,
+    'batch_norm': True,
+    'num_conv_layers': 2,
+    'num_lstm_hidden_layers': 2,
+    'kernel_size': [3, 3],
+    'kernel_stride': [1, 1],
+    'lstm_features': 128,
+    'conv1d_kernel_size': 3,
+    'conv1d_kernel_stride': 1,
+    'epochs': 20,
+    'gen_spectrogram': True,
+    'spectrogram_params': None,
+    'loss': 'categorical_crossentropy',
+    'optimizer': 'adam',
+    'has_gpu': tf.test.is_gpu_available(cuda_only=True),
+    'multiprocess': False,
+    'threads': 1,
+  }
+  
 
 # Create a base class for Keras models
 class KerasModel:
@@ -59,11 +85,6 @@ class KerasModel:
     path = path+'/results.csv'
     self.callbacks.append(tf.keras.callbacks.CSVLogger(filename=path, separator=',', append=True))
 
-    #def learning_rate_decay (x) :
-    #  return self.hparams * (0.9 ** self.hparams['lr_decay'])
-    
-    #self.callbacks.append(tf.keras.callbacks.LearningRateScheduler(learning_rate_decay))
-    
     if self.verbose: print(self.callbacks)
 
     if self.hparams['optimizer'] == 'adam':
