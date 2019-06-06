@@ -64,7 +64,7 @@ class KerasModel:
     
     #self.callbacks.append(tf.keras.callbacks.LearningRateScheduler(learning_rate_decay))
     
-    print (self.callbacks)
+    if self.verbose: print(self.callbacks)
 
     if self.hparams['optimizer'] == 'adam':
       if 'lr' in self.hparams.keys():
@@ -72,7 +72,9 @@ class KerasModel:
                                                   decay=self.hparams['lr_decay'])
       else:
         self.optimizer = tf.keras.optimizers.Adam()
-    
+   
+    if self.verbose: print(self.optimizer)
+
   def compile(self):
     self.model.compile(loss=self.hparams['loss'],
                        optimizer=self.optimizer,
