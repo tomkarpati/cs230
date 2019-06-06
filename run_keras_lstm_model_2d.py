@@ -59,7 +59,6 @@ hparams['num_classes'] = keras_data_generator.get_num_classes()
 data_generator_verbose = False
 
 # Use the project data processing directives
-utils.log_timestamp()
 if not args.fast:
   training_data = generate_data_sets.read_dataset(name="training",
                                                   in_dir=args.data_dir)
