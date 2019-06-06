@@ -37,7 +37,7 @@ class LstmModel(keras_model.KerasModel):
 
     X_in = tf.keras.layers.Input(shape=self.hparams['input_shape'], name='input')
     x = tf.keras.layers.Lambda(lstm_transpose_layer)(X_in)
-    x = tf.keras.layers.Lambda(lambda x : tf.expand_dims(x, axis=3))(X_in)
+    x = tf.keras.layers.Lambda(lambda x : tf.expand_dims(x, axis=3))(x)
     if self.hparams['batch_norm']: x = tf.keras.layers.BatchNormalization()(x)
     
     # Repeat n times
