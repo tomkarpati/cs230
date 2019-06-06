@@ -41,6 +41,8 @@ hparams = {
   'spectrogram_params': None,
   'loss': 'categorical_crossentropy',
   'optimizer': 'adam',
+  'lr': 0.001,
+  'lr_decay': 0.0,
   'has_gpu': tf.test.is_gpu_available(cuda_only=True),
   'multiprocess': False,
   'threads': 1,

@@ -5,6 +5,15 @@ import tensorflow as tf
 
 import json
 
+# Override the tensorboard callback to dump out our learning rate
+class LRTensorBoard(tf.keras.callbacks.TensorBoard):
+  def __init__(self, log_dir):  # add other arguments to __init__ if you need
+    super().__init__(log_dir=log_dir)
+
+  def on_epoch_end(self, epoch, logs=None):
+    logs.update({'lr': tf.keras.backend.eval(self.model.optimizer.lr)})
+    super().on_epoch_end(epoch, logs)
+        
 
 # Create a base class for Keras models
 class KerasModel:
@@ -33,25 +42,38 @@ class KerasModel:
     self.callbacks.append(tf.keras.callbacks.ModelCheckpoint(filepath=path,
                                                              verbose=self.verbose))
 
-    # define a callback for tensorboard
+    # define callbacks for tensorboard
     path = self.model_dir+'/tensorboard'
     os.makedirs(path, exist_ok=True)
     self.callbacks.append(tf.keras.callbacks.TensorBoard(log_dir=path,
                                                          histogram_freq=100,
                                                          write_images=True,
                                                          update_freq=100*self.hparams['batch_size']))
-
+    path = self.model_dir+'/tensorboard_lr'
+    os.makedirs(path, exist_ok=True)
+    self.callbacks.append(LRTensorBoard(log_dir=path))
+    
     # Write out results per epoch
     path = self.model_dir+'/csv_results'
     os.makedirs(path, exist_ok=True)
     path = path+'/results.csv'
     self.callbacks.append(tf.keras.callbacks.CSVLogger(filename=path, separator=',', append=True))
 
+    #def learning_rate_decay (x) :
+    #  return self.hparams * (0.9 ** self.hparams['lr_decay'])
+    
+    #self.callbacks.append(tf.keras.callbacks.LearningRateScheduler(learning_rate_decay))
+    
     print (self.callbacks)
 
+    if self.hparams['optimizer'] == 'adam':
+      self.optimizer = tf.keras.optimizers.Adam(lr=self.hparams['lr'],
+                                                decay=self.hparams['lr_decay'])
+
+    
   def compile(self):
     self.model.compile(loss=self.hparams['loss'],
-                       optimizer=self.hparams['optimizer'],
+                       optimizer=self.optimizer,
                        metrics=['categorical_accuracy'],
                        options=self.run_options,
                        run_metadata=self.run_metadata)
