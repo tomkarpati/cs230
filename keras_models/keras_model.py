@@ -88,7 +88,7 @@ class KerasModel:
     path = path+'/results.csv'
     self.callbacks.append(tf.keras.callbacks.CSVLogger(filename=path, separator=',', append=True))
 
-    print (self.callbacks)
+    if self.verbose: print(self.callbacks)
 
     if self.hparams['optimizer'] == 'adam':
       if 'lr' in self.hparams.keys():
@@ -96,7 +96,9 @@ class KerasModel:
                                                   decay=self.hparams['lr_decay'])
       else:
         self.optimizer = tf.keras.optimizers.Adam()
-    
+   
+    if self.verbose: print(self.optimizer)
+
   def compile(self):
     self.model.compile(loss=self.hparams['loss'],
                        optimizer=self.optimizer,
