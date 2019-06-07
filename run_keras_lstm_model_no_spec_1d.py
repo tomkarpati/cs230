@@ -34,6 +34,8 @@ hparams['kernel_size'] = [3, 3, 3]
 hparams['kernel_stride'] = [1, 1, 1]
 hparams['epochs'] = 10
 hparams['gen_spectrogram'] = False
+hparams['basis_kernel_size'] = 64
+hparams['basis_kernel_stride'] = 32
 # Get the information about the input data shape and the number of classes from
 # the data. This will get passed to the model when we generate it.
 hparams['input_shape'] = keras_data_generator.get_input_shape(hparams)
