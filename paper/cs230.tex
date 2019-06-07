@@ -301,6 +301,7 @@ recurrent layers perform sequential modelling of the input data from
 the convolutions over time. The LSTM layers use a hyperbolic tangent
 activation function. The recurrent activation function is the hard
 sigmoid function.
+
 These recurrent layers allow us to process
 the audio data over time without needing to have access to the entire
 sample at once. The advanatage here is that we can continually feed
@@ -310,12 +311,14 @@ only network architectures. Beyond that, as we get more audio data
 over time, we can only keep a window of convolutional results and add
 to it as we get more raw data. We don't need to keep all of the raw
 data to process, but rather only enough that we can generate new
-convolutional results as needed.
+convolutional results as needed. The output of the last LSTM layer
+passes into a fully connected layer which generates a softmax output.
 
-The output of the last LSTM layer passes into a fully connected layer
-which generates a softmax output. The loss for the network is the
-categorical loss function for single class selection based on one-hot
-encoding.
+The loss for the network is the categorical loss function for single
+class selection based on one-hot encoding. The entire network is
+trained using the Adam optimization algorithm using a learning rate of
+0.001 and a learning rate decay of 0.0001.
+
 
 TODO: Provide loss function as equation.
 
@@ -332,6 +335,36 @@ paragraphs. Note: Theory/algorithms projects may have an appendix showing extend
 proofs (see Appendix section below).
 
 \section{Experiments/Results/Discussion}
+Our baseline model produced fairly decent results in line with our
+expectations. The model produced 80\% accuracy on the test set
+provided with the dataset. While the results were reassuring, the
+model still suffered from the drawbacks outlined above. The second of
+our models was the recurrent network with non-pooling single
+dimensional convolution. While this model addressed the drawbacks of
+the convolution only baseline model, this model produced worse results
+in the simple case. The 1d convolutional model was tuned to get an
+idea of the impact from different parameters.
+
+The results of tuning the 1D convolutional baseline mode are outlined
+in table TODO:(insert table ref here.) The largest impact was provided
+by both an increase in the number of convolutional layers and the
+number of recurrent layers as expected. The training accuracy of the
+model increased from a single convolutional layer to 3 convolutional
+layers and 1 lstm layer to 3 lstm layers. While the training accuracy
+of the model was fairly high, the model showed high variance as seen
+by the much lower accuracy number on the validation data. While
+dropout reduced the variance of the model, the accuracy on the
+training data did suffer as expected. A dropout keep rate of 0.7
+produced good results, the lower rate appeared to spread the features
+too much across the weights between the layers. For 1D convolutional
+model, the larger kernel sizes produced better results than the
+smaller sizes. To counteract the noise in the loss functions as the
+loss converged to zero, we introduced learning rate decay to prevent
+us from overshooting as we converge on the loss. A value of 0.0001
+produced good results and resulted in reduced variance between the
+training and the validation data sets.
+
+
 
 TODO: Remove
 
