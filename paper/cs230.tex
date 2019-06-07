@@ -9,15 +9,13 @@
 \usepackage{nicefrac}       % compact symbols for 1/2, etc.
 \usepackage{microtype}      % microtypography
 \usepackage{graphicx}
-\title{Formatting instructions for CS230-Winter 2018}
+\title{Spoken Command Recognition}
 
 \author{
-  John K.~Doe\thanks{Use footnote for providing further
-    information about author (webpage, alternative
-    address)---\emph{not} for acknowledging funding agencies.} \\
+  Thomas Karpati \\
   Department of Computer Science\\
   Stanford University\\
-  \texttt{***@stanford.edu} \\
+  \texttt{tkarpati@stanford.edu} \\
   %% examples of more authors
   %% \And
   %% Coauthor \\
@@ -51,10 +49,39 @@
 \maketitle
 
 \begin{abstract}
-The abstract should consist of 1 paragraph describing the motivation for your paper and a high-level explanation of the methodology you used/results obtained.
+  Ineractions with agents in the world has been increasing using voice
+  commands. This allows users to interact without the use of a
+  terminal input such as when they are not in close proximity, are
+  otherwise physically occupied, or enable users such as children who
+  are illiterate and cannot use standard computing interaces which
+  would require the ability to read. In the simple case such an agent
+  would need to be able to recognize basic commands to perform
+  tasks. One of the preprocessing steps which is common for speech
+  recognition is the use of the spectrograph. This operation converts
+  the single dimension of an audio saple to a two dimensional
+  representation of the audio waveform through a basis
+  transformation. This representation can be processed as a two
+  dimensional image to extract features before passing this to a
+  sequential model. 
 \end{abstract}
 
-\section{Introduction}	
+\section{Introduction}
+Speech recognition is allowing more accessible interactions with
+agents. Deep learning systems have allowed for improved speech
+recognition accuracy through sequential models. Often the inputs to
+these sequential models is the spectrogram representation of an audio
+waveform. The spectrogram is a representation which converts the time
+domain audio waveform into a multidimensional basis space for segments
+of time within a sliding window. The result of this is a
+multidimensional representation of the audio waveform during a
+specified period of time. As these are accumulated over time, this can
+be seen as a two dimensional representation of the audio waveform. Our
+alogrithm explores applying two dimmensional network architectures to
+a traditional sequential model for speech recognition processing. 
+
+
+
+
 Explain the problem and why it is important. Discuss your motivation for pursuing this
 problem. Give some background if necessary. Clearly state what the input and output
 is. Be very explicit: “The input to our algorithm is an {image, amplitude, patient age,
@@ -76,6 +103,44 @@ for this: https://scholar.google.com/ (you can click “cite” and it generates
 BibTeX, etc.)
 
 \section{Dataset and Features}
+To evaluate models for spoken command recognition, the dataset used
+was provided for the Kaggle TensorFlow speech recognition
+challenge[2][3]. This dataset contains 10 labelled commands
+which are “yes”, “no”, “up”, “down”, “left”, “right”, “on”, “off”,
+“stop”, and “go”. In addition to these, the dataset is augmented with
+two additional classes which are “unknown” and silence. The “unknown”
+class contains other utterances that are not the commands that we are
+trying to catagorize. The silence class corresponds to no
+utterance, but rather background noise. The input data is provided as
+audio clips in WAV format sampled at 16Khz. This data set therefore
+maps an audio file to 12 possible classes. The audio provided is all
+approximately 1 sec in duration, with some slight variation in
+length. The dataset contains 64,727 audio samples. With the samples
+are also provided lists of samples for both validation and test set
+splitting. There are 6835 valiation samples and 6798 test samples
+provided. The remaining of the 64,727 samples are used for training.
+
+The entire data set comprises 30 possible spoken commands in
+approximately equal distribution. Of these, only 10 are commands that
+are to be differentiated. The remaining 20 are other words that are
+spoken which get pooled into the \"unknown\" class and are not
+differentiated.
+
+The 64,727 audio samples were preprocessed. For each sample, if the
+sample belonged to the 10 classes that we are interested in, they were
+labeled with that class, otherwise they were labeled with the
+\"unknown\" class. If the sample was background noise, it was labeled
+with the \"silence\" class. After the samples were re-binned into the
+classes that we are interested in, they were all converted to a common
+size. Most samples are of 1 second in duration at 16Khz, or 16,000
+samples in length. The regularity of the data allows for easily
+creating batches of sequences for batch processing. Any audio clips
+that are too long have a 16,000 sample window taken from the too long
+length clip. Any audio clips that are too short are padded to the correct
+length.
+
+
+
 Describe your dataset: how many training/validation/test examples do you have? Is there
 any preprocessing you did? What about normalization or data augmentation? What is the
 resolution of your images? How is your time-series data discretized? Include a citation on
