@@ -11,6 +11,7 @@
 \usepackage{graphicx}
 \usepackage{subcaption}
 \usepackage{wrapfig}
+\usepackage{array}
 \title{Spoken Command Recognition}
 
 \author{
@@ -389,8 +390,6 @@ us from overshooting as we converge on the loss. A value of 0.0001
 produced good results and resulted in reduced variance between the
 training and the validation data sets.
 
-
-
 TODO: Remove
 
 You should also give details about what (hyper)parameters you chose (e.g. why did you
@@ -414,9 +413,134 @@ Why do you think that some algorithms worked better than others? For
 future work, if you had more time, more team members, or more computational resources,
 what would you explore?
 
-\section{Contributions}
-The contributions section is not included in the 5 page limit. This section should describe
-what each team member worked on and contributed to the project.
+\section{Additional Results}
+\begin{table}[!htbp]
+  \resizebox{\textwidth}{!} {
+    \begin{tabular} { |m{3cm}|c|c|c|c|c|m{3cm}|c|c|c|c| }
+      \hline
+      Architecture & \multicolumn{3}{|c|}{Convolutional Kernel} &
+      \multicolumn{2}{|c|}{Recurrent} & Other &
+      \multicolumn{2}{|c|}{Parameters} & \multicolumn{2}{|c|}{Accuracy} \\
+      \hline
+      & Size & Stride & \# Layers &
+      \# Cells & \# Layers & &
+      Total & Trainable & Train & Validation \\ \hline
+      \hline
+      Baseline & 3 & 1 & 4 &
+      - & - & Batch Norm, Dropout = 0.5, FC (N = 128), Activation =
+      ELU, Global pooling &
+      - & - & 0.8066 & 0.8073 \\ \hline
+      \hline
+      Keras Baseline & 3 & 1 & 4 &
+      - & - & Batch Norm, Dropout = 0.5, FC (N = 128), Activation =
+      ELU, Flattening &
+      2,048K & 2,048K & 0.9805 & 0.0206 \\ \hline
+      \hline
+      Conv1d LSTM & 3 & 1 & 1 &
+      128 & 1 & No Batch Norm, No Dropout &
+      88K & 88K & 0.7061 & 0.7651 \\ \hline
+      Conv1d LSTM & 3 & 1 & 2 &
+      128 & 2 & No Batch Norm, No Dropout &
+      219K & 219K & 0.7940 & 0.7924 \\ \hline
+      Conv1d LSTM & 3 & 1 & 1 &
+      128 & 1 & Batch Norm, No Dropout &
+      89K & 88K & 0.9482 & 0.8956 \\ \hline
+      Conv1d LSTM & 3 & 1 & 1 &
+      128 & 2 & Batch Norm, No Dropout &
+      221K & 220K & 0.9530 & 0.8726 \\ \hline
+      Conv1d LSTM & 3 & 1 & 2 &
+      128 & 1 & Batch Norm, No Dropout &
+      99K & 98K & 0.9497 & 0.9028 \\ \hline
+      Conv1d LSTM & 3 & 1 & 2 &
+      128 & 2 & Batch Norm, No Dropout &
+      231K & 230K & 0.9422 & 0.8850 \\ \hline
+      Conv1d LSTM & 3 & 1 & 3 &
+      128 & 3 & Batch Norm, No Dropout &
+      388K & 386K & 0.9610 & 0.8898 \\ \hline
+      \hline
+      Conv1d LSTM & 5 & 3 & 2 &
+      128 & 3 & Batch Norm, No Dropout &
+      374K & 373K & 0.9709 & 0.8945 \\ \hline
+      Conv1d LSTM & 7 & 3 & 2 &
+      128 & 3 & Batch Norm, No Dropout &
+      383K & 382K & 0.9706 & 0.8982 \\ \hline
+      Conv1d LSTM & 15 & 3 & 2 &
+      128 & 3 & Batch Norm, No Dropout &
+      421K & 419K & 0.9648 & 0.8942 \\ \hline
+      \hline
+      Conv1d LSTM & 3 & 1 & 2 &
+      128 & 1 & Batch Norm, Dropout = 0.5 &
+      100K & 99K & 0.9041 & 0.8470 \\ \hline
+      Conv1d LSTM & 3 & 1 & 2 &
+      128 & 1 & Batch Norm, Dropout = 0.7 &
+      100K & 99K & 0.9631 & 0.8923 \\ \hline
+      Conv1d LSTM & 3 & 1 & 3 &
+      128 & 3 & Batch Norm, Dropout = 0.5 &
+      388K & 386K & 0.9107 & 0.8395 \\ \hline
+      Conv1d LSTM & 3 & 1 & 3 &
+      128 & 3 & Batch Norm, Dropout = 0.7 &
+      388K & 386K & 0.9445 & 0.8480 \\ \hline
+      \hline
+      Conv1d LSTM & 7 & 3 & 2 &
+      128 & 3 & Batch Norm, Dropout = 0.7, lr\_decay = 0.0 &
+      383K & 382K & 0.8957 & 0.8953 \\ \hline
+      Conv1d LSTM & 7 & 3 & 2 &
+      128 & 3 & Batch Norm, Dropout = 0.7, lr\_decay = 0.001 &
+      383K & 382K & 0.8684 & 0.9060 \\ \hline
+      Conv1d LSTM & 3 & 1 & 2 &
+      128 & 1 & Batch Norm, Dropout = 0.7, lr\_decay = 0.0001 &
+      383K & 382K & 0.9005 & 0.9081 \\ \hline
+      \hline
+      conv2d LSTM & 3 & 1 & 2 &
+      128 & 1 & Batch Norm &
+      1,138K & 1,138K & 0.9822 & 0.8907 \\ \hline
+      conv2d LSTM & 3 & 1 & 3 &
+      128 & 2 & Batch Norm &
+      1,306K & 1,305K & 0.9862 & 0.9425 \\ \hline
+      conv2d LSTM & 3 & 1 & 3 &
+      128 & 3 & Batch Norm &
+      1,439K & 1,437K & 0.9822 & 0.9347 \\ \hline
+      \hline
+      conv2d LSTM & 3 & 1 & 3 &
+      128 & 3 & Batch Norm, Dropout = 0.7, lr\_decay = 0.0 &
+      1,439K & 1,437K & 0.9779 & 0.9525 \\ \hline
+      conv2d LSTM & 3 & 1 & 3 &
+      128 & 3 & Batch Norm, Dropout = 0.7, lr\_decay = 0.001 &
+      1,439K & 1,437K & 0.9824 & 0.8756 \\ \hline
+      conv2d LSTM & 3 & 1 & 3 &
+      128 & 3 & Batch Norm, Dropout = 0.7, lr\_decay = 0.0001 &
+      1,439K & 1,437K & 0.9860 & 0.9459 \\ \hline
+      \hline
+      conv2d LSTM & 5 & 3 & 3 &
+      128 & 3 & Batch Norm, Dropout = 0.7, lr\_decay = 0.0001 &
+      464K & 463K & 0.8308 & 0.8536 \\ \hline
+      conv2d LSTM & 7 & 3 & 3 &
+      128 & 3 & Batch Norm, Dropout = 0.7, lr\_decay = 0.0001 &
+      526K & 525K & 0.8737 & 0.8672 \\ \hline
+      \hline
+      conv2d LSTM & 3 & 1 & 3 &
+      256 & 3 & Batch Norm, Dropout = 0.7, lr\_decay = 0.0001 &
+      3,509K & 3,507K & 0.9875 & 0.9385 \\ \hline
+      conv2d LSTM & 3 & 1 & 3 &
+      384 & 3 & Batch Norm, Dropout = 0.7, lr\_decay = 0.0001 &
+      6,235K & 6,232K & 0.9892 & 0.9135 \\ \hline
+      \hline
+      conv2d LSTM & 3 & 1 & 3 &
+      128 & 3 & Batch Norm, Dropout = 0.7, lr\_decay = 0.0001,
+      fft\_length = 256, fft\_stride = 128 &
+      914K & 913K & 0.9863 & 0.9029 \\ \hline
+      conv2d LSTM & 3 & 1 & 3 &
+      128 & 3 & Batch Norm, Dropout = 0.7, lr\_decay = 0.0001,
+      fft\_length = 128, fft\_stride = 64 &
+      521K & 520K & & \\ \hline
+      
+    \end{tabular}
+  }
+  \caption{Full experimental results}
+  \label{tab:full_results}
+\end{table}
+Additional results are located in Table \ref{tab:full_results}
+
 
 \section*{References}
 This section should include citations for: (1) Any papers mentioned in the related work
