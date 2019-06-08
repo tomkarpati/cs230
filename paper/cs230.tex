@@ -10,6 +10,7 @@
 \usepackage{microtype}      % microtypography
 \usepackage{graphicx}
 \usepackage{subcaption}
+\usepackage{wrapfig}
 \title{Spoken Command Recognition}
 
 \author{
@@ -142,8 +143,6 @@ dimensional (time and frequency domain) convolutions followed by a max
 pooling layer to add invariance and reduce the inputs to the following
 layers.
 
-TODO: Simple diagrams of the networks.
-
 TODO: Cite related work here.
 
 TODO: Provide current state of the art accuracy from related work
@@ -251,12 +250,23 @@ layer CNN interleaved with 2x2 max pool layers. The convolutional
 layers all implement 3x3 filter kernels and contain power of two
 multiples of 16 filters per layer (The layers from 1 to 4 contain
 16, 32, 64, 128 filters respectively. These are then followed by 2
-fully connected layers and finally a softmax output layer. Also
+fully connected layers and finally a softmax output layer. The
+baseline model is described in figure \ref{fig:baseline}. Also
 evaluated are networks with time dimensional colvolutions feed to a
 recurrent LSTM layer. These would correspond to the more traditional
 recurrent speech recognition networks.
 
-These two models are merged into a hybrid network taking the
+\begin{wrapfigure}{R}{0.5\linewidth}
+  \includegraphics[width=.48\textwidth]{images/baseline}
+  \caption{Baseline convolutional model}
+  \label{fig:baseline}
+  \includegraphics[width=.48\textwidth]{images/crnn}
+  \caption{Convolutional-recurrent model}
+  \label{fig:crnn}
+\end{wrapfigure}
+
+These two models are merged into a hybrid network (figure
+\ref{fig:crnn} taking the
 advantages of both systems. At the end of the convolutional layers, we
 are left with a time sequence of several frequency features for each
 of the filter bank outputs. At this point, instead of performing a max
@@ -293,10 +303,11 @@ speed that the speaker is speaking and also the pitch of the
 speaker. The multiple layers will extract larger and larger features
 in the data where individual sounds uttered can vary in both time and
 frequency due to the use of the max polling layers to aid in
-robustness.
+robustness. Details are provided in figure \ref{fig:crnn-conv}.
 
 The outputs of the convolutional portion of the network are then
-flattened per time step and fed to one of more recurrent layers. These
+flattened per time step and fed to one of more recurrent layers as
+described in figure \ref{fig:crnn-lstm}. These
 recurrent layers perform sequential modelling of the input data from
 the convolutions over time. The LSTM layers use a hyperbolic tangent
 activation function. The recurrent activation function is the hard
@@ -318,6 +329,20 @@ The loss for the network is the categorical loss function for single
 class selection based on one-hot encoding. The entire network is
 trained using the Adam optimization algorithm using a learning rate of
 0.001 and a learning rate decay of 0.0001.
+
+\begin{figure}
+  \begin{subfigure}{.5\linewidth}
+    \includegraphics[width=\linewidth]{images/crnn-conv_layer}
+    \caption{Convolutional layer detail}
+    \label{fig:crnn-conv}
+  \end{subfigure}%
+  \begin{subfigure}{.5\linewidth}
+    \includegraphics[width=\linewidth]{images/crnn-lstm_layer}
+    \caption{Convolutional to recurrent layer}
+    \label{fig:crnn-lstm}
+  \end{subfigure}
+  \caption{Details of proposed model layers}
+\end{figure}
 
 
 TODO: Provide loss function as equation.
