@@ -72,9 +72,11 @@ class DataSequence(tensorflow.keras.utils.Sequence):
     # Turn this into a nparray
     X_list = []
     idx = 0
+    self.flist = []
     self.Y = np.zeros([len(self.dataset), len(LABELS)])
     for example in self.dataset:
         X_list.append(example['data'])
+        self.flist.append(example['filename'])
         label = example['class']
         if label not in LABELS: label = 'unknown'
         self.Y[idx, LABEL2ID[label]] = 1  # generate one-hot representation
@@ -116,11 +118,17 @@ class DataSequence(tensorflow.keras.utils.Sequence):
       )
       x = s
 
-      if self.verbose:
-        print (np.shape(x)[1:])
-        print (self.hparams['input_shape'])
+    if self.verbose:
+      print (np.shape(x)[1:])
+      print (self.hparams['input_shape'])
 
     #assert(np.shape(x)[1:] == self.hparams['input_shape'])
     y = self.Y[select[0]:select[1]]
 
     return x,y
+
+  def get_data_tuple(self, idx):
+    x = self.X[idx]
+    f = self.flist[idx]
+    y = self.Y[idx]
+    return x, f, y
