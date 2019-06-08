@@ -29,10 +29,14 @@ args = parser.parse_args()
 
 # Get the default parameters and override as needed
 hparams = keras_model.get_default_hyperparameters()
+hparams['num_conv_layers'] = 3
+hparams['kernel_size'] = [3, 3, 3]
+hparams['kernel_stride'] = [1, 1, 1]
+hparams['num_lstm_hidden_layers'] = 2
 hparams['dropout'] = True
-hparams['epochs'] = 2
-#hparams['lr'] = 0.001
-#hparams['lr_decay'] = 0.001
+hparams['lr'] = 0.001
+hparams['lr_decay'] = 0.0001
+hparams['spectrogram_params'] = { 'window_length': 64, 'window_step': 32, 'fft_length': 64}
 # Get the information about the input data shape and the number of classes from
 # the data. This will get passed to the model when we generate it.
 hparams['input_shape'] = keras_data_generator.get_input_shape(hparams)
