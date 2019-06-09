@@ -34,6 +34,7 @@ hparams['kernel_size'] = [7, 7, 7]
 hparams['kernel_stride'] = [3, 3, 3]
 hparams['lr'] = 0.001
 hparams['lr_decay'] = 0.0001
+hparams['lstm_features'] = 256
 # Get the information about the input data shape and the number of classes from
 # the data. This will get passed to the model when we generate it.
 hparams['input_shape'] = keras_data_generator.get_input_shape(hparams)

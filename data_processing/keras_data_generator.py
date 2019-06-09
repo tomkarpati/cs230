@@ -40,7 +40,7 @@ def get_input_shape(hparams):
     # shape[0] is the result of the computation (one sided)
     shape[0] = sg_params['fft_length'] // 2 + 1
     # shape[1] is the number of segments we compute
-    shape[1] = int(np.ceil((MAX_SAMPLES - sg_params['window_length']) / sg_params['window_step']))
+    shape[1] = int(np.ceil((MAX_SAMPLES - sg_params['window_length'] + 1) / sg_params['window_step']))
     return shape
   else:
     return [MAX_SAMPLES]
