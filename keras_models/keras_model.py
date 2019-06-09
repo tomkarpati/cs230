@@ -132,6 +132,18 @@ class KerasModel:
                                          workers=self.hparams['threads'],
                                          use_multiprocessing=self.hparams['multiprocess'])
 
+  def predict(self,
+              sequence,
+              verbose=False):
+
+    return self.model.predict_generator(generator=sequence,
+                                        steps=None,
+                                        verbose=2,
+                                        workers=self.hparams['threads'],
+                                        use_multiprocessing=self.hparams['multiprocess'])
+
+    
+  
   def dump_info(self):
     # Dump hyperparameter information
     print("Hyperparameters: ")
