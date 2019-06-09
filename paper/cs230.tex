@@ -19,27 +19,6 @@
   Department of Computer Science\\
   Stanford University\\
   \texttt{tkarpati@stanford.edu} \\
-  %% examples of more authors
-  %% \And
-  %% Coauthor \\
-  %% Affiliation \\
-  %% Address \\
-  %% \texttt{email} \\
-  %% \AND
-  %% Coauthor \\
-  %% Affiliation \\
-  %% Address \\
-  %% \texttt{email} \\
-  %% \And
-  %% Coauthor \\
-  %% Affiliation \\
-  %% Address \\
-  %% \texttt{email} \\
-  %% \And
-  %% Coauthor \\
-  %% Affiliation \\
-  %% Address \\
-  %% \texttt{email} \\
 }
 
 \begin{document}
@@ -52,7 +31,7 @@
 \maketitle
 
 \begin{abstract}
-  Interactions with agents in the world has been increasing using voice
+  Interactions with agents in the world has increasingly been using voice
   commands. This allows users to interact without the use of a
   terminal input such as when they are not in close proximity, are
   otherwise physically occupied, or enable users such as children who
@@ -71,29 +50,29 @@
 \section{Introduction}
 Speech recognition is allowing more accessible interactions with
 agents. Deep learning systems have allowed for improved speech
-recognition accuracy through sequential models. Often the inputs to
-these sequential models is the spectrogram representation of an audio
-waveform. The spectrogram is a representation which converts the time
-domain audio waveform into a multidimensional basis space for segments
+recognition accuracy through sequential models, which increases the
+accessibility of system to a wider variety of users, and allows
+interactions with agents who may not be in physical proximity of the
+user. Often the inputs to these sequential models is the spectrogram
+representation of an audio waveform. The spectrogram is a
+representation which converts the time domain audio waveform into a
+multidimensional basis space for segments
 of time within a sliding window. The result of this is a
 multidimensional representation of the audio waveform during a
 specified period of time. As these are accumulated over time, this can
 be seen as a two dimensional representation of the audio waveform. Our
 alogrithm explores applying two dimmensional network architectures to
-a traditional sequential model for speech recognition processing. 
+a traditional sequential model for speech recognition processing as a
+more hybrid model for performing speech recognition.
 
-
-
-TODO: Remove
-Explain the problem and why it is important. Discuss your motivation for pursuing this
-problem. Give some background if necessary. Clearly state what the input and output
-is. Be very explicit: “The input to our algorithm is an {image, amplitude, patient age,
-rainfall measurements, grayscale video, etc.}. We then use a {SVM, neural network, linear
-regression, etc.} to output a predicted {age, stock price, cancer type, music genre, etc.}.”
-This is very important since different teams have different inputs/outputs spanning different
-application domains. Being explicit about this makes it easier for readers. If you are using
-your project for multiple classes, add a paragraph explaining which components of the
-project were used for each class.
+The inputs to our algorithm are audio waveforms and the correct class
+from 12 available commands are predicted. We have 10 known classes of
+commands and two additional classes which are an unknown command class
+and a no spoken word class. Our network requires an initial processing
+step to generate the spectrogram of the waveform as input to the
+network. In addition to our proposed hybrid network, we also explore
+performing complete end-to-end processing in our network from the raw
+audio waveform without any pre-processing steps. 
 
 \section{Related work}
 There are several approaches to the speech recognition
@@ -101,31 +80,36 @@ problem. Dominant approaches involve use of recurrent networks which
 take the sequential nature of the audio as it progresses through time
 into account. These vary from those with simple recurrent cells to
 larger more comples bi-directional recurrent cells that process large
-segments of time at once. Other approaches to the command recognition
-problem involve use of both 1D and 2D convolutional networks as will
-as somple fully connected dense networks over the spectrogram of the
+segments of time at once\cite{amodei2016deep}. Other approaches to the
+command recognition
+problem involve use of both 1D and 2D convolutional
+networks\cite{oxerin-baseline, arik2017convolutional} as well
+as simple fully connected dense networks over the spectrogram of the
 data.
 
 Both of these appoaches have their advanatages and drawbacks. The use
 of the fully connected dense and two dimensional convolutional
 networks can extract significant features across the entire space of
 the input to the network by using the entire time and frequency
-information available. The 2D convolutional network is able to extract
+information available\cite{hinton2012deep}. The 2D convolutional
+network is able to extract
 features from both across time and across frequencies by applying
-network structures from image processing to the spectrogram. This
-approach does ignore the sequential nature of the data (but can take this
-into account by the relative weights of the connections to different
-parts of the spectrogram) however the exact position of the utterance
-in question needs to known so that the utterance can be located
-properly within the time frame that is being looked at. The assumption
-here is that the time of the utterance is known.
+network structures from image processing to the
+spectrogram\cite{sainath2015convolutional}. This
+approach does ignore the sequential nature of the data (but can take
+this into account by the relative weights of the connections to
+different parts of the spectrogram) however the exact position of the
+utterance in question needs to known so that the utterance can be
+located properly within the time frame that is being looked at. The
+assumption here is that the time of the utterance is known.
 
 The recurrent networks take the sequential nature of speech into
 account. These networks have shown to be highly effective in speech
 recognition, and typically use the spectrogram as the input feature
 transformation to the input of the network. Effective speech
 recognition systems will typically also employ bidirectional recurrent
-cells for encoding the speech data. The drawback here is that
+cells for encoding the speech data\cite{zhang2017hello}. The drawback
+here is that
 bidirectional networks will impact the latency for command
 detection. While effective for speech-to-text or translation domains,
 keyword and command recognition system are latency sensitive, and thus
@@ -136,7 +120,17 @@ not fully allow for convolution across the frequencies. Even systems
 that only convolve in two dimensions may not be taking invariance into
 account in the input waveforms.
 
-We seek to overcome the limitations of either of these approaches by
+The current state of the art for the dataset in question applies a
+basic convolutional filter in two dimensions and bi-directional LSTM
+cells with an accuracy just over 95\%\cite{zhang2017hello}. The latest
+statistics from the
+Kaggle competition has a best accuracy of approximately
+90\%\cite{kaggle}.
+
+We seek to achieve similar results without the use
+of bi-directional recurrent cells which would decrease the latency of
+the models. Our proposed model can overcome the limitations of either
+of these approaches by
 both implementing the convolutional approach and using this to feed
 into a forward only recurrent layer. Following from image processing
 convolutional network, we extend these architectures with multiple two
@@ -144,24 +138,10 @@ dimensional (time and frequency domain) convolutions followed by a max
 pooling layer to add invariance and reduce the inputs to the following
 layers.
 
-TODO: Cite related work here.
-
-TODO: Provide current state of the art accuracy from related work
-
-TODO: Remove
-You should find existing papers, group them into categories based on their approaches,
-and discuss their strengths and weaknesses, as well as how they are similar to and differ
-from your work. In your opinion, which approaches were clever/good? What is the stateof-the-art?
-Do most people perform the task by hand? You should aim to have at least
-5 references in the related work. Include previous attempts by others at your problem,
-previous technical methods, or previous learning algorithms. Google Scholar is very useful
-for this: https://scholar.google.com/ (you can click “cite” and it generates MLA, APA,
-BibTeX, etc.)
-
 \section{Dataset and Features}
 To evaluate models for spoken command recognition, the dataset used
 was provided for the Kaggle TensorFlow speech recognition
-challenge (TODO: CITE HERE)[2][3]. This dataset contains 10 labelled commands
+challenge \cite{kaggle, speechcommands}. This dataset contains 10 labelled commands
 which are ``yes'', ``no'', ``up'', ``down'', ``left'', ``right'', ``on'', ``off'',
 ``stop'', and ``go''. In addition to these, the dataset is augmented with
 two additional classes which are “unknown” and silence. The “unknown”
@@ -203,7 +183,7 @@ to scale the waveform to have amplitude in the range [-1,+1].
     \label{fig:wave_right}
   \end{subfigure}%
   \begin{subfigure}{.5\linewidth}
-    \includegraphics[width=\linewidth]{images/spectrogram-right}
+    \includegraphics[width=0.8\linewidth]{images/spectrogram-right}
     \caption{Audio spectrogram of utterance ``right''}
     \label{fig:spec_right}
   \end{subfigure}
@@ -223,19 +203,6 @@ composed of large magnitudes of frequencies at the low end
 corresponding to the word. For evaluation of the model without the use
 of spectrograms as input data transformation, the audio waveform was
 used keeping the sampling rate at 16KHz.
-
-TODO: remove
-
-Describe your dataset: how many training/validation/test examples do you have? Is there
-any preprocessing you did? What about normalization or data augmentation? What is the
-resolution of your images? How is your time-series data discretized? Include a citation on
-where you obtained your dataset from. Depending on available space, show some examples
-from your dataset. You should also talk about the features you used. If you extracted
-features using Fourier transforms, word2vec, PCA,
-ICA, etc. make sure to talk about it. Try to include examples of your data in the report
-(e.g. include an image, show a waveform, etc.).
-
-
 
 \section{ Methods }
 As a simple baseline model, a simple multilayer convolutional neural
@@ -326,11 +293,6 @@ data to process, but rather only enough that we can generate new
 convolutional results as needed. The output of the last LSTM layer
 passes into a fully connected layer which generates a softmax output.
 
-The loss for the network is the categorical loss function for single
-class selection based on one-hot encoding. The entire network is
-trained using the Adam optimization algorithm using a learning rate of
-0.001 and a learning rate decay of 0.0001.
-
 \begin{figure}
   \begin{subfigure}{.5\linewidth}
     \includegraphics[width=\linewidth]{images/crnn-conv_layer}
@@ -345,20 +307,29 @@ trained using the Adam optimization algorithm using a learning rate of
   \caption{Details of proposed model layers}
 \end{figure}
 
+We also explored having the network learn the basis function for a
+spectral transform which is currently performed by the short-time
+Fourier Transform to compute the spectrogram which would allow our
+system to be a true end-to-end system where it would be fed only
+samples of audio. This is accomplished by multiple filter banks of a
+single one dimensional convolution
+layer in the network which would produce an output like the
+spectrogram but projecting a window of data from the audio waveform
+into a learned set of basis functions instead of sine and cosine waves.
 
-TODO: Provide loss function as equation.
+The loss for the network is the categorical loss function for single
+class selection based on one-hot encoding. The entire network is
+trained using the Adam optimization algorithm using a learning rate of
+0.001 and a learning rate decay of 0.0001.
 
-
-TODO: REMOVE
-
-Describe your learning algorithms, proposed algorithm(s), or theoretical proof(s). Make
-sure to include relevant mathematical notation. For example, you can include the loss function you are using. It is okay to use formulas from the lectures (online or in-class). For each algorithm, give a short description 
-of how it works. Again, we are looking for your understanding of how these deep
-learning algorithms work. Although the teaching staff probably know the algorithms, future
-readers may not (reports will be posted on the class website). Additionally, if you are
-using a niche or cutting-edge algorithm (anything else not covered in the class), you may want to explain your algorithm using 1/2
-paragraphs. Note: Theory/algorithms projects may have an appendix showing extended
-proofs (see Appendix section below).
+Our models were developed in Python with the Keras framework running
+on the TensorFlow backend. Experiments were run on Google Cloud using
+the Deep Learning VM with an NVidia Tesla K80 GPU attached. The system
+could train a 2 million parameter model at approximately 500ms per
+step. This results in training our model with 3 conv2d layers and 2
+recurrent layers with batch normalization, dropout, and learning rate
+decay for 20 epochs in approximately 75 minutes. Code is available
+from GitHub: \url{https://github.com/tomkarpati/cs230.git}
 
 \section{Experiments/Results/Discussion}
 Our baseline model produced fairly decent results in line with our
@@ -368,52 +339,141 @@ model still suffered from the drawbacks outlined above. The second of
 our models was the recurrent network with non-pooling single
 dimensional convolution. While this model addressed the drawbacks of
 the convolution only baseline model, this model produced worse results
-in the simple case. The 1d convolutional model was tuned to get an
+in the simple case. The 1D convolutional model was tuned to get an
 idea of the impact from different parameters.
 
-The results of tuning the 1D convolutional baseline mode are outlined
-in table TODO:(insert table ref here.) The largest impact was provided
-by both an increase in the number of convolutional layers and the
-number of recurrent layers as expected. The training accuracy of the
-model increased from a single convolutional layer to 3 convolutional
-layers and 1 lstm layer to 3 lstm layers. While the training accuracy
-of the model was fairly high, the model showed high variance as seen
-by the much lower accuracy number on the validation data. While
-dropout reduced the variance of the model, the accuracy on the
-training data did suffer as expected. A dropout keep rate of 0.7
-produced good results, the lower rate appeared to spread the features
-too much across the weights between the layers. For 1D convolutional
-model, the larger kernel sizes produced better results than the
-smaller sizes. To counteract the noise in the loss functions as the
-loss converged to zero, we introduced learning rate decay to prevent
-us from overshooting as we converge on the loss. A value of 0.0001
-produced good results and resulted in reduced variance between the
-training and the validation data sets.
+A summary of results of tuning the 1D convolutional baseline mode are
+outlined in table \cite{tab:summary_results}. The largest impact was
+provided by both an increase in the number of convolutional layers and
+the number of recurrent layers as expected. The training accuracy of
+the model increased from a single convolutional layer to 3
+convolutional layers and 1 lstm layer to 3 lstm layers. While the
+training accuracy of the model was fairly high, the model showed high
+variance as seen by the much lower accuracy number on the validation
+data. While dropout reduced the variance of the model, the accuracy on
+the training data did suffer as expected. A dropout keep rate of 0.7
+produced good results, but a lower rate appeared to spread the
+features too much across the weights between the layers. For the 1D
+convolutional model, the larger kernel sizes produced better results
+than the smaller sizes. To counteract the noise in the loss functions
+as the loss converged to zero, we introduced learning rate decay to
+prevent us from overshooting as we converge on the loss. A value of
+0.0001 produced good results and resulted in reduced variance between
+the training and the validation data sets.
 
-TODO: Remove
+Our two dimensional convolutional model was also tuned across the same
+lines. This results are also summarized in table
+\cite{tab:summary_results}. Again, increases in both the number of
+convolutional layers and the number of recurrent layers increased the
+accuracy of the results. Training speed was increased with batch
+normalization and variance reduced with dropout. Again a keep rate of
+0.7 produced good results for the dropout layers. Adding learning rate
+decay also produced better results in line with the observations with
+the one dimentional case. With the two
+dimensional convolutional layers, we noticed a decease in accuracy
+with the increase in 2D convolutional kernel sizes and
+strides. Increasing both of these did not result in any better
+results, and rather produced worse results for our
+network. Additionally, increases in the number of hidden nodes in our
+LSTM layers marginally increased our training accuracy, but this did
+not translate to any increase in our validation results indicating
+overfitting of our data with the increase in parameters that this
+resulted in. In addition, we also looked at effect of varying the FFT
+parameters that were used to feed the spectorgrams to the
+network. Decreasing the FFT length and window size over the values
+512, 256, 128, and 64 did not produce any better results as the FFT
+got smaller, however the number of parameters did get smaller
+resulting in a smaller and faster model computationally. The smaller
+FFT would also require less memory to store the samples for the FFT
+computation.
 
-You should also give details about what (hyper)parameters you chose (e.g. why did you
-use X learning rate for gradient descent, what was your mini-batch size and why) and how
-you chose them. What your primary metrics are: accuracy, precision,
-AUC, etc. Provide equations for the metrics if necessary. For results, you want to have a
-mixture of tables and plots. If you are solving a classification problem, you should include a
-confusion matrix or AUC/AUPRC curves. Include performance metrics such as precision,
-recall, and accuracy. For regression problems, state the average error. You should have
-both quantitative and qualitative results. To reiterate, you must have both quantitative
-and qualitative results! If it applies: include visualizations of results, heatmaps,
-examples of where your algorithm failed and a discussion of why certain algorithms failed
-or succeeded. In addition, explain whether you think you have overfit to your training set
-and what, if anything, you did to mitigate that. Make sure to discuss the figures/tables in
-your main text throughout this section. Your plots should include legends, axis labels, and
-have font sizes that are legible when printed.
+\begin{table}[!htbp]
+  \resizebox{\textwidth}{!} {
+    \begin{tabular} { |m{3cm}|c|c|c|c|c|m{3cm}|c|c|c|c| }
+      \hline
+      Architecture & \multicolumn{3}{|c|}{Convolutional Kernel} &
+      \multicolumn{2}{|c|}{Recurrent} & Other &
+      \multicolumn{2}{|c|}{Parameters} & \multicolumn{2}{|c|}{Accuracy} \\
+      \hline
+      & Size & Stride & \# Layers &
+      \# Cells & \# Layers & &
+      Total & Trainable & Train & Validation \\ \hline
+      \hline
+      Baseline & 3 & 1 & 4 &
+      - & - & Batch Norm, Dropout = 0.5, FC (N = 128), Activation =
+      ELU, Global pooling &
+      - & - & 0.8066 & 0.8073 \\ \hline
+      \hline
+      Keras Baseline & 3 & 1 & 4 &
+      - & - & Batch Norm, Dropout = 0.5, FC (N = 128), Activation =
+      ELU, Flattening &
+      2,048K & 2,048K & 0.9805 & 0.0206 \\ \hline
+      \hline
+      Conv1d LSTM & 3 & 1 & 2 &
+      128 & 1 & Batch Norm, Dropout = 0.7, lr\_decay = 0.0001 &
+      383K & 382K & 0.9005 & 0.9081 \\ \hline
+      \hline
+      conv2d LSTM & 3 & 1 & 3 &
+      128 & 3 & Batch Norm, Dropout = 0.7, lr\_decay = 0.0001 &
+      1,439K & 1,437K & 0.9860 & 0.9459 \\ \hline
+      \hline
+      conv2d LSTM & 3 & 1 & 3 &
+      256 & 3 & Batch Norm, Dropout = 0.7, lr\_decay = 0.0001 &
+      3,509K & 3,507K & 0.9875 & 0.9385 \\ \hline
+      conv2d LSTM & 3 & 1 & 3 &
+      384 & 3 & Batch Norm, Dropout = 0.7, lr\_decay = 0.0001 &
+      6,235K & 6,232K & 0.9892 & 0.9135 \\ \hline
+      \hline
+      conv2d LSTM & 3 & 1 & 3 &
+      128 & 3 & Batch Norm, Dropout = 0.7, lr\_decay = 0.0001,
+      fft\_length = 256, fft\_stride = 128 &
+      914K & 913K & 0.9863 & 0.9029 \\ \hline
+      conv2d LSTM & 3 & 1 & 3 &
+      128 & 3 & Batch Norm, Dropout = 0.7, lr\_decay = 0.0001,
+      fft\_length = 128, fft\_stride = 64 &
+      652K & 651K & 0.9839 & 0.9319 \\ \hline
+      conv2d LSTM & 3 & 1 & 3 &
+      128 & 3 & Batch Norm, Dropout = 0.7, lr\_decay = 0.0001,
+      fft\_length = 64, fft\_stride = 32 &
+      521K & 520K & 0.9831 & 0.9272 \\ \hline
+    \end{tabular}
+  }
+  \caption{Summary experimental results}
+  \label{tab:summary_results}
+\end{table}
+
+Finally, we attempted to have the network learn basis functions for
+the initial raw audio preprocessing. The addition of the one
+dimensional convolutional layer resulted in our model becoming
+untrainable. Our training and validation set accuracies were not able
+to increase beyond about 60\%. We started with a 1D convolutional
+kernel of 512 samples and stride of 256 samples. The trainability of
+our model didn't see any improvement as the size of the initial 1D
+kernel was decrease through 256, 128, and 64 samples (with 1/2 FFT
+with window stride through the audio data). The initial basis function
+mapping appeared to be too large for the model to be able to minimize
+the loss functional effectively.
 
 \section{Conclusion/Future Work }
-Summarize your report and reiterate key points. Which algorithms were the highestperforming?
-Why do you think that some algorithms worked better than others? For
-future work, if you had more time, more team members, or more computational resources,
-what would you explore?
+We found that the our hybrid convolutional and recurrent network
+produced good results on our dataset but would be better suited to
+command detection in the real world than some of the other 2D
+convolutional and fully connected networks that we had looked at due
+to the use of the unidirectional recurrent cells, but was able to
+produce good results with the aid of the 2D pooling layers to provide
+some invariance on both the time and frequency domains. Our attempts
+to learn new basis functions to replace the initial short-time fourier
+transform preprocessing step were unproductive. Additional work would
+involve more testing of utterances of commands from other speakers
+that are not used in either the training or validation steps to
+determine accuracy to commands spoken by users who have never been
+seen before. Finally, additional work would be to implement a simple
+preprocessing step to differentiate any utterances from background
+noise to initially screen out background noise, and reduce the overall
+computation that the system performs over time, to just the time when
+the system can determine that it actually needs to be paying attention.
 
-\section{Additional Results}
+\section{Supplemental Results}
 \begin{table}[!htbp]
   \resizebox{\textwidth}{!} {
     \begin{tabular} { |m{3cm}|c|c|c|c|c|m{3cm}|c|c|c|c| }
@@ -532,7 +592,11 @@ what would you explore?
       conv2d LSTM & 3 & 1 & 3 &
       128 & 3 & Batch Norm, Dropout = 0.7, lr\_decay = 0.0001,
       fft\_length = 128, fft\_stride = 64 &
-      521K & 520K & & \\ \hline
+      652K & 651K & 0.9839 & 0.9319 \\ \hline
+      conv2d LSTM & 3 & 1 & 3 &
+      128 & 3 & Batch Norm, Dropout = 0.7, lr\_decay = 0.0001,
+      fft\_length = 64, fft\_stride = 32 &
+      521K & 520K & 0.9831 & 0.9272 \\ \hline
       
     \end{tabular}
   }
@@ -542,32 +606,7 @@ what would you explore?
 Additional results are located in Table \ref{tab:full_results}
 
 
-\section*{References}
-This section should include citations for: (1) Any papers mentioned in the related work
-section. (2) Papers describing algorithms that you used which were not covered in class.
-(3) Code or libraries you downloaded and used. This includes libraries such as scikit-learn, Tensorflow, Pytorch, Keras etc. Acceptable formats include: MLA, APA, IEEE. If you
-do not use one of these formats, each reference entry must include the following (preferably
-in this order): author(s), title, conference/journal, publisher, year. If you are using TeX,
-you can use any bibliography format which includes the items mentioned above. We are excluding
-the references section from the page limit to encourage students to perform a thorough
-literature review/related work section without being space-penalized if they include more
-references. Any choice of citation style is acceptable
-as long as you are consistent. 
-
-\medskip
-\small
-[1] Alexander, J.A.\ \& Mozer, M.C.\ (1995) Template-based algorithms
-for connectionist rule extraction. In G.\ Tesauro, D.S.\ Touretzky and
-T.K.\ Leen (eds.), {\it Advances in Neural Information Processing
-  Systems 7}, pp.\ 609--616. Cambridge, MA: MIT Press.
-
-[2] Bower, J.M.\ \& Beeman, D.\ (1995) {\it The Book of GENESIS:
-  Exploring Realistic Neural Models with the GEneral NEural SImulation
-  System.}  New York: TELOS/Springer--Verlag.
-
-[3] Hasselmo, M.E., Schnell, E.\ \& Barkai, E.\ (1995) Dynamics of
-learning and recall at excitatory recurrent synapses and cholinergic
-modulation in rat hippocampal region CA3. {\it Journal of
-  Neuroscience} {\bf 15}(7):5249-5262.
+\bibliography{cs230}{}
+\bibliographystyle{plain}
 
 \end{document}
