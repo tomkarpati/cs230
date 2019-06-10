@@ -35,7 +35,7 @@
   voice commands, allowing users to interact without the use of a
   terminal input such as when they are not in close proximity, are
   otherwise physically occupied, or users such as children who
-  are illiterate and cannot use standard computing interaces which
+  are illiterate and cannot use standard computing interfaces which
   would require the ability to read. In the simple case such an agent
   would need to be able to recognize basic commands to perform
   tasks. We propose a 2D convolutional and recurrent network model for
@@ -55,7 +55,7 @@ space for segments of time over a sliding window. The result of this
 is a multidimensional representation of the audio waveform during a
 specified period of time. As these are accumulated over time, this can
 be seen as a two dimensional representation of the audio waveform. Our
-alogrithm explores applying two dimmensional network architectures to
+algorithm explores applying two dimensional network architectures to
 a traditional sequential model for speech recognition processing as a
 more hybrid model for performing speech recognition.
 
@@ -72,7 +72,7 @@ There are several approaches to the speech recognition
 problem. Dominant approaches involve use of recurrent networks which
 take the sequential nature of the audio as it progresses through time
 into account. These vary from those with simple recurrent cells to
-larger more comples bi-directional recurrent cells that process large
+larger more complex bi-directional recurrent cells that process large
 segments of time at once\cite{amodei2016deep}. Other approaches to the
 command recognition
 problem involve use of both 1D and 2D convolutional
@@ -80,7 +80,7 @@ networks\cite{oxerin-baseline, arik2017convolutional} as well
 as simple fully connected dense networks over the spectrogram of the
 data.
 
-Both of these appoaches have their advanatages and drawbacks. The
+Both of these approaches have their advantages and drawbacks. The
 fully connected dense and two dimensional convolutional
 networks can extract significant features across the entire space of
 the input to the network by using the entire time and frequency
@@ -140,14 +140,14 @@ commands which are ``yes'', ``no'', ``up'', ``down'', ``left'',
 these, the dataset is augmented with two additional classes which are
 “unknown” and silence. The “unknown” class contains other utterances
 that are not the commands that we are
-trying to catagorize. The silence class corresponds to no
+trying to categorize. The silence class corresponds to no
 utterance, in other words - background noise. The input data is provided as
-audio clips in WAV format sampled at 16Khz. This data set therefore
+audio clips in WAV format sampled at 16KHz. This data set therefore
 maps an audio file to 12 possible classes. The audio provided is all
 approximately 1 sec in duration, with some slight variation in
 length. The dataset contains 64,727 audio samples. Along with the examples
 are also provided lists of examples for both validation and test set
-splitting. There are 6835 valiation samples and 6798 test samples
+splitting. There are 6835 validation samples and 6798 test samples
 provided. The remaining of the 64,727 samples are used for training.
 
 The entire data set comprises 30 possible spoken commands in
@@ -162,8 +162,8 @@ labeled with that class, otherwise they were labeled with the
 ``unknown'' class. If the sample was background noise, it was labeled
 with the ``silence'' class. After the samples were re-binned into the
 classes that we are interested in, they were all converted to a common
-size. Most samples are of 1 second in duration at 16Khz, or 16,000
-samples in length, allowing for easily creating batchs. Any audio clips
+size. Most samples are of 1 second in duration at 16KHz, or 16,000
+samples in length, allowing for easily creating batches. Any audio clips
 that are too long have a 16,000 sample window taken from the too long
 length clip. Any audio clips that are too short are padded to the correct
 length. The only other preprocessing of the data from the WAV file was
@@ -183,12 +183,12 @@ to scale the waveform to have amplitude in the range [-1,+1].
 \end{figure}
 Model evaluation was done with the use of spectrogram to
 transform the audio waveform. The spectrogram computes the magnitude
-of the short time fourier transform of the 1D audio waveform over a
+of the short time Fourier transform of the 1D audio waveform over a
 short window of the data. The window of the transform passes over the
 waveform through time with some stride. This representation of the
 data provides the magnitude of different frequencies that compose the
-audio waveform during the time window that is under concideration. The
-spectrogram of the utterence ``right'' is seen in figure
+audio waveform during the time window that is under consideration. The
+spectrogram of the utterance ``right'' is seen in figure
 \ref{fig:spec_right}. The spectrogram shows that the waveform is
 composed of large magnitudes of frequencies at the low end
 corresponding to the word. For evaluation of the model without the use
@@ -204,14 +204,14 @@ convolutional filter should be able to extract features from this
 representation of the input. Coupled with this is the fairly
 consistent size of the input audio waveform, and a CNN network can
 take the spectrogram of an entire speech utterance as an input
-image. The specfic CNN model that was used for the baseline is a 4
+image. The specific CNN model that was used for the baseline is a 4
 layer CNN interleaved with 2x2 max pool layers\cite{oxerin-baseline}. The convolutional
 layers all implement 3x3 filter kernels and contain power of two
 multiples of 16 filters per layer (The layers from 1 to 4 contain
 16, 32, 64, 128 filters respectively. These are then followed by 2
 fully connected layers and finally a softmax output layer. The
 baseline model is described in figure \ref{fig:baseline}. Also
-evaluated are networks with time dimensional colvolutions fed to a
+evaluated are networks with time dimensional convolutions fed to a
 recurrent LSTM layer. These would correspond to the more traditional
 recurrent speech recognition networks.
 \begin{figure}
@@ -240,15 +240,15 @@ layers following a fairly standard multi-layer recurrent
 network. which feeds to a softmax output to determine the command
 class.
 
-The proposed network takes a batch of spectograms of audio data, since
+The proposed network takes a batch of spectrograms of audio data, since
 our data has been processed to all be of a fixed length at 16,000
 samples. The input spectrogram contains 512 frequencies over a window
 length of 512 samples of the audio waveform. The audio windows for spectral
 transformation have a stride of 160 pixels (or 10ms) of audio. This
-generates an input data set of 512 freqencies over 97 time samples of
+generates an input data set of 512 frequencies over 97 time samples of
 data. This feeds multiple 2D convolutional and max pooling layers.
 
-The colvolutional layers successively perform 2D convolution on the
+The convolutional layers successively perform 2D convolution on the
 input. Following the convolution is a batch normalization layer to aid
 in training. Before being fed into the next set of convolutional layer
 there is a dropout layer to aid in reducing the variance of the
@@ -257,7 +257,7 @@ ReLU activation function. Finally, there is a max pooling step with a
 2x2 window and a stride of 2 samples to produce the output of the
 convolution layer. This set of layers are repeated with more filters
 used in each layer. The convolutions will extract features in both the
-time and frequncy domains and look for certain patterns in the
+time and frequency domains and look for certain patterns in the
 data. The max pool step in each layer provides some level of
 invariance in both time and frequency to account for variations in the
 speed that the speaker is speaking and also the pitch of the
@@ -269,14 +269,14 @@ robustness. Details are provided in figure \ref{fig:crnn-conv}.
 The outputs of the convolutional portion of the network are then
 flattened per time step and fed to one of more recurrent layers as
 described in figure \ref{fig:crnn-lstm}. These
-recurrent layers perform sequential modelling of the input data from
+recurrent layers perform sequential modeling of the input data from
 the convolutions over time. The LSTM layers use a hyperbolic tangent
 activation function. The recurrent activation function is the hard
 sigmoid function.
 
 These recurrent layers allow us to process
 the audio data over time without needing to have access to the entire
-sample all at once. The advanatage here is that we can continually feed
+sample all at once. The advantage here is that we can continually feed
 data into the recurrent network as we get more audio data which
 overcomes the main drawback of the fully connected or convolutional
 only network architectures. Beyond that, as we get more audio data
@@ -339,7 +339,7 @@ outlined in table \cite{tab:summary-results}. The largest impact was
 provided by both an increase in the number of convolutional layers and
 the number of recurrent layers as expected. The training accuracy of
 the model increased from a single convolutional layer to 3
-convolutional layers and 1 lstm layer to 3 lstm layers. While the
+convolutional layers and 1 LSTM layer to 3 LSTM layers. While the
 training accuracy of the model was fairly high, the model showed high
 variance as seen by the much lower accuracy number on the validation
 data without dropout. A dropout keep rate of 0.7
@@ -361,7 +361,7 @@ hidden nodes in our LSTM layers marginally increased our training
 accuracy, but this did not translate to any increase in our validation
 results indicating overfitting of our data. In addition, we also
 looked at effect of varying the FFT parameters that were used to feed
-the spectorgrams to the network. Decreasing the FFT length and window
+the spectrograms to the network. Decreasing the FFT length and window
 size over the values 512, 256, 128, and 64 did not produce any better
 results as the FFT got smaller, however the number of parameters did
 get smaller resulting in a smaller and faster model
@@ -439,7 +439,7 @@ suited to command detection in the real world than some of the other 2D
 convolutional and fully connected networks that we had looked at due
 to the use of the unidirectional recurrent cells due to
 some invariance on both the time and frequency domains. Our attempts
-to learn new basis functions to replace the initial short-time fourier
+to learn new basis functions to replace the initial short-time Fourier
 transform preprocessing step were unproductive. Additional work would
 involve more testing of utterances of commands from other speakers
 that are not used in either the training or validation steps to
