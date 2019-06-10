@@ -168,13 +168,14 @@ that are too long have a 16,000 sample window taken from the too long
 length clip. Any audio clips that are too short are padded to the correct
 length. The only other preprocessing of the data from the WAV file was
 to scale the waveform to have amplitude in the range [-1,+1].
+
 \begin{figure}
-  \begin{subfigure}{.5\linewidth}
+  \begin{subfigure}{.45\textwidth}
     \includegraphics[width=\linewidth]{images/waveform-right}
     \caption{Audio waveform of utterance ``right''}
     \label{fig:wave_right}
   \end{subfigure}%
-  \begin{subfigure}{.5\linewidth}
+  \begin{subfigure}{.45\textwidth}
     \includegraphics[width=0.75\linewidth]{images/spectrogram-right}
     \caption{Audio spectrogram of utterance ``right''}
     \label{fig:spec_right}
@@ -215,19 +216,21 @@ baseline model is described in figure \ref{fig:baseline}. Also
 evaluated are networks with time dimensional convolutions fed to a
 recurrent LSTM layer. These would correspond to the more traditional
 recurrent speech recognition networks.
+
 \begin{figure}
-  \begin{subfigure}{.5\linewidth}
+  \begin{subfigure}{.45\textwidth}
     \includegraphics[width=\linewidth]{images/baseline}
     \caption{Baseline convolutional model}
     \label{fig:baseline}
   \end{subfigure}%
-  \begin{subfigure}{.5\linewidth}
+  \begin{subfigure}{.45\textwidth}
     \includegraphics[width=\linewidth]{images/crnn}
     \caption{Convolutional-recurrent model}
     \label{fig:crnn}
   \end{subfigure}
   \caption{Model architectures evaluated}
 \end{figure}
+
 These two models are merged into a hybrid network (figure
 \ref{fig:crnn}) taking the
 advantages of both systems. At the end of the convolutional layers, we
@@ -286,19 +289,21 @@ to it as we get more raw data. We don't need to keep all of the raw
 data to process, but rather only enough that we can generate new
 convolutional results as needed. The output of the last LSTM layer
 passes into a fully connected layer which generates a softmax output.
+
 \begin{figure}
-  \begin{subfigure}{.5\linewidth}
+  \begin{subfigure}{.45\textwidth}
     \includegraphics[width=\linewidth]{images/crnn-conv_layer}
     \caption{Convolutional layer detail}
     \label{fig:crnn-conv}
   \end{subfigure}%
-  \begin{subfigure}{.5\linewidth}
+  \begin{subfigure}{.45\textwidth}
     \includegraphics[width=\linewidth]{images/crnn-lstm_layer}
     \caption{Convolutional to recurrent layer}
     \label{fig:crnn-lstm}
   \end{subfigure}
   \caption{Details of proposed model layers}
 \end{figure}
+
 We also explored having the network learn the basis function for a
 spectral transform which is currently performed by the short-time
 Fourier Transform to compute the spectrogram which would allow our
@@ -367,7 +372,8 @@ size over the values 512, 256, 128, and 64 did not produce any better
 results as the FFT got smaller, however the number of parameters did
 get smaller resulting in a smaller and faster model
 computationally and less required memory.
-\begin{table}[!htbp]
+
+\begin{table}
   \resizebox{\textwidth}{!} {
     \begin{tabular} { |m{2.5cm}|c|c|c|c|c|m{5cm}|c|c|c|c| }
       \hline
@@ -419,7 +425,6 @@ computationally and less required memory.
   \caption{Summary experimental results}
   \label{tab:summary-results}
 \end{table}
-
 Finally, we attempted to have the network learn basis functions for
 the initial raw audio preprocessing. The addition of the one
 dimensional convolutional layer resulted in our model becoming
