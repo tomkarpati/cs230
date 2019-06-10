@@ -31,42 +31,35 @@
 \maketitle
 
 \begin{abstract}
-  Interactions with agents in the world has increasingly been using voice
-  commands, allowing users to interact without the use of a
+  Interactions with agents in the world has increasingly been using
+  voice commands, allowing users to interact without the use of a
   terminal input such as when they are not in close proximity, are
   otherwise physically occupied, or users such as children who
   are illiterate and cannot use standard computing interaces which
   would require the ability to read. In the simple case such an agent
   would need to be able to recognize basic commands to perform
-  tasks. One of the preprocessing steps which is common for speech
-  recognition is the use of the spectrograph. This operation converts
-  the single dimension of an audio saple to a two dimensional
-  representation of the audio waveform through a basis
-  transformation. This representation can be processed as a two
-  dimensional image to extract features before passing this to a
-  sequential model. 
+  tasks. We propose a 2D convolutional and recurrent network model for
+  this task.
 \end{abstract}
 
 \section{Introduction}
 Speech recognition is allowing more accessible interactions with
-agents. Deep learning systems have allowed for improved speech
+agents. Deep learning systems have enabled improved speech
 recognition accuracy through sequential models, which increases the
 accessibility of system to a wider variety of users, and allows
 interactions with agents who may not be in physical proximity of the
 user. Often the inputs to these sequential models is the spectrogram
-representation of an audio waveform. The spectrogram is a
-representation which converts the time domain audio waveform into a
-multidimensional basis space for segments
-of time within a sliding window. The result of this is a
-multidimensional representation of the audio waveform during a
+representation of an audio waveform. This is a representation which
+converts the time domain audio waveform into a multidimensional basis
+space for segments of time over a sliding window. The result of this
+is a multidimensional representation of the audio waveform during a
 specified period of time. As these are accumulated over time, this can
 be seen as a two dimensional representation of the audio waveform. Our
 alogrithm explores applying two dimmensional network architectures to
 a traditional sequential model for speech recognition processing as a
 more hybrid model for performing speech recognition.
 
-The inputs to our algorithm are audio waveforms and the correct class
-from 12 available commands are predicted. We have 10 known classes of
+The inputs to our algorithm are audio waveforms. We have 10 known classes of
 commands and two additional classes which are an unknown command class
 and a no spoken word class. Our network requires an initial processing
 step to generate the spectrogram of the waveform as input to the
@@ -87,8 +80,8 @@ networks\cite{oxerin-baseline, arik2017convolutional} as well
 as simple fully connected dense networks over the spectrogram of the
 data.
 
-Both of these appoaches have their advanatages and drawbacks. The use
-of the fully connected dense and two dimensional convolutional
+Both of these appoaches have their advanatages and drawbacks. The
+fully connected dense and two dimensional convolutional
 networks can extract significant features across the entire space of
 the input to the network by using the entire time and frequency
 information available\cite{hinton2012deep}. The 2D convolutional
@@ -96,12 +89,12 @@ network is able to extract
 features from both across time and across frequencies by applying
 network structures from image processing to the
 spectrogram\cite{sainath2015convolutional}. This
-approach does ignore the sequential nature of the data (but can take
+approach does indirectly ignore the sequential nature of the data (but
+can take
 this into account by the relative weights of the connections to
 different parts of the spectrogram) however the exact position of the
 utterance in question needs to known so that the utterance can be
-located properly within the time frame that is being looked at. The
-assumption here is that the time of the utterance is known.
+located properly within the time frame that is being looked at.
 
 The recurrent networks take the sequential nature of speech into
 account. These networks have shown to be highly effective in speech
@@ -118,14 +111,14 @@ impractical. Also, systems which implement 1D convolution before the
 recurrent cells, while taking the frequency domain into account, do
 not fully allow for convolution across the frequencies. Even systems
 that only convolve in two dimensions may not be taking invariance into
-account in the input waveforms.
+account in the input waveforms without the pooling layer.
 
 The current state of the art for the dataset in question applies a
 basic convolutional filter in two dimensions and bi-directional LSTM
 cells with an accuracy just over 95\%\cite{zhang2017hello}. The latest
 statistics from the
 Kaggle competition has a best accuracy of approximately
-90\%\cite{kaggle}.
+90\%\cite{kaggle} on test set data.
 
 We seek to achieve similar results without the use
 of bi-directional recurrent cells which would decrease the latency of
@@ -139,27 +132,28 @@ pooling layer to add invariance and reduce the inputs to the following
 layers.
 
 \section{Dataset and Features}
-To evaluate models for spoken command recognition, the dataset used
-was provided for the Kaggle TensorFlow speech recognition
-challenge \cite{kaggle, speechcommands}. This dataset contains 10 labelled commands
-which are ``yes'', ``no'', ``up'', ``down'', ``left'', ``right'', ``on'', ``off'',
-``stop'', and ``go''. In addition to these, the dataset is augmented with
-two additional classes which are “unknown” and silence. The “unknown”
-class contains other utterances that are not the commands that we are
+To evaluate models for spoken command recognition, we used the dataset
+provided for the Kaggle TensorFlow speech recognition challenge
+\cite{kaggle, speechcommands}. This dataset contains 10 labelled
+commands which are ``yes'', ``no'', ``up'', ``down'', ``left'',
+``right'', ``on'', ``off'', ``stop'', and ``go''. In addition to
+these, the dataset is augmented with two additional classes which are
+“unknown” and silence. The “unknown” class contains other utterances
+that are not the commands that we are
 trying to catagorize. The silence class corresponds to no
-utterance, but rather background noise. The input data is provided as
+utterance, in other words - background noise. The input data is provided as
 audio clips in WAV format sampled at 16Khz. This data set therefore
 maps an audio file to 12 possible classes. The audio provided is all
 approximately 1 sec in duration, with some slight variation in
-length. The dataset contains 64,727 audio samples. With the samples
-are also provided lists of samples for both validation and test set
+length. The dataset contains 64,727 audio samples. Along with the examples
+are also provided lists of examples for both validation and test set
 splitting. There are 6835 valiation samples and 6798 test samples
 provided. The remaining of the 64,727 samples are used for training.
 
 The entire data set comprises 30 possible spoken commands in
 approximately equal distribution. Of these, only 10 are commands that
 are to be differentiated. The remaining 20 are other words that are
-spoken which get pooled into the ``unknown'' class and are not
+spoken which get accumulated into the ``unknown'' class and are not
 differentiated.
 
 The 64,727 audio samples were preprocessed. For each sample, if the
@@ -169,13 +163,11 @@ labeled with that class, otherwise they were labeled with the
 with the ``silence'' class. After the samples were re-binned into the
 classes that we are interested in, they were all converted to a common
 size. Most samples are of 1 second in duration at 16Khz, or 16,000
-samples in length. The regularity of the data allows for easily
-creating batches of sequences for batch processing. Any audio clips
+samples in length, allowing for easily creating batchs. Any audio clips
 that are too long have a 16,000 sample window taken from the too long
 length clip. Any audio clips that are too short are padded to the correct
 length. The only other preprocessing of the data from the WAV file was
 to scale the waveform to have amplitude in the range [-1,+1].
-
 \begin{figure}
   \begin{subfigure}{.5\linewidth}
     \includegraphics[width=\linewidth]{images/waveform-right}
@@ -183,20 +175,19 @@ to scale the waveform to have amplitude in the range [-1,+1].
     \label{fig:wave_right}
   \end{subfigure}%
   \begin{subfigure}{.5\linewidth}
-    \includegraphics[width=0.8\linewidth]{images/spectrogram-right}
+    \includegraphics[width=0.75\linewidth]{images/spectrogram-right}
     \caption{Audio spectrogram of utterance ``right''}
     \label{fig:spec_right}
   \end{subfigure}
   \caption{Representations of audio data}
 \end{figure}
-
-Model evaluation was also done with the use of spectrogram to
+Model evaluation was done with the use of spectrogram to
 transform the audio waveform. The spectrogram computes the magnitude
 of the short time fourier transform of the 1D audio waveform over a
 short window of the data. The window of the transform passes over the
 waveform through time with some stride. This representation of the
 data provides the magnitude of different frequencies that compose the
-audio waveform during the window that is under concideration. The
+audio waveform during the time window that is under concideration. The
 spectrogram of the utterence ``right'' is seen in figure
 \ref{fig:spec_right}. The spectrogram shows that the waveform is
 composed of large magnitudes of frequencies at the low end
@@ -208,49 +199,51 @@ used keeping the sampling rate at 16KHz.
 As a simple baseline model, a simple multilayer convolutional neural
 network (CNN) was evaluated[1]. The motivation behind a CNN network
 architecture is to take advantage of the 2D nature of the spectrogram
-of the sound wave. Since the spectorgram is two dimensional, a 2D
+of the sound wave. Since the spectrogram is two dimensional, a 2D
 convolutional filter should be able to extract features from this
 representation of the input. Coupled with this is the fairly
-consistent size of the input audio waveform, and a CNN netwrok can
+consistent size of the input audio waveform, and a CNN network can
 take the spectrogram of an entire speech utterance as an input
 image. The specfic CNN model that was used for the baseline is a 4
-layer CNN interleaved with 2x2 max pool layers. The convolutional
+layer CNN interleaved with 2x2 max pool layers\cite{oxerin-baseline}. The convolutional
 layers all implement 3x3 filter kernels and contain power of two
 multiples of 16 filters per layer (The layers from 1 to 4 contain
 16, 32, 64, 128 filters respectively. These are then followed by 2
 fully connected layers and finally a softmax output layer. The
 baseline model is described in figure \ref{fig:baseline}. Also
-evaluated are networks with time dimensional colvolutions feed to a
+evaluated are networks with time dimensional colvolutions fed to a
 recurrent LSTM layer. These would correspond to the more traditional
 recurrent speech recognition networks.
-
-\begin{wrapfigure}{R}{0.5\linewidth}
-  \includegraphics[width=.48\textwidth]{images/baseline}
-  \caption{Baseline convolutional model}
-  \label{fig:baseline}
-  \includegraphics[width=.48\textwidth]{images/crnn}
-  \caption{Convolutional-recurrent model}
-  \label{fig:crnn}
-\end{wrapfigure}
-
+\begin{figure}
+  \begin{subfigure}{.5\linewidth}
+    \includegraphics[width=\linewidth]{images/baseline}
+    \caption{Baseline convolutional model}
+    \label{fig:baseline}
+  \end{subfigure}%
+  \begin{subfigure}{.5\linewidth}
+    \includegraphics[width=\linewidth]{images/crnn}
+    \caption{Convolutional-recurrent model}
+    \label{fig:crnn}
+  \end{subfigure}
+  \caption{Model architectures evaluated}
+\end{figure}
 These two models are merged into a hybrid network (figure
-\ref{fig:crnn} taking the
+\ref{fig:crnn}) taking the
 advantages of both systems. At the end of the convolutional layers, we
 are left with a time sequence of several frequency features for each
 of the filter bank outputs. At this point, instead of performing a max
 or average pooling step across all of the frequencies, we stack all of
 the frequency and filter outputs for a point in time into a single
-feature vector at that time point. This allow for keeping separation
-between the frequency features for the output of each filter bank to
-feed into the recurrent layers. The following is a fairly standard
-multi-layer recurrent network. which feeds to a softmax output to
-determine the command class.
+feature vector at that time point. This allow for keeping separate
+features for the output of each filter bank to feed into the recurrent
+layers following a fairly standard multi-layer recurrent
+network. which feeds to a softmax output to determine the command
+class.
 
-The proposed network takes a batch of spectograms of audio data. Since
+The proposed network takes a batch of spectograms of audio data, since
 our data has been processed to all be of a fixed length at 16,000
-samples, we can batch samples together to pass into our network for
-efficiency. The input spectrogram contains 512 frequencies over 512
-sample windows of the audio waveform. The audio windows for spectral
+samples. The input spectrogram contains 512 frequencies over a window
+length of 512 samples of the audio waveform. The audio windows for spectral
 transformation have a stride of 160 pixels (or 10ms) of audio. This
 generates an input data set of 512 freqencies over 97 time samples of
 data. This feeds multiple 2D convolutional and max pooling layers.
@@ -283,7 +276,7 @@ sigmoid function.
 
 These recurrent layers allow us to process
 the audio data over time without needing to have access to the entire
-sample at once. The advanatage here is that we can continually feed
+sample all at once. The advanatage here is that we can continually feed
 data into the recurrent network as we get more audio data which
 overcomes the main drawback of the fully connected or convolutional
 only network architectures. Beyond that, as we get more audio data
@@ -292,7 +285,6 @@ to it as we get more raw data. We don't need to keep all of the raw
 data to process, but rather only enough that we can generate new
 convolutional results as needed. The output of the last LSTM layer
 passes into a fully connected layer which generates a softmax output.
-
 \begin{figure}
   \begin{subfigure}{.5\linewidth}
     \includegraphics[width=\linewidth]{images/crnn-conv_layer}
@@ -306,14 +298,13 @@ passes into a fully connected layer which generates a softmax output.
   \end{subfigure}
   \caption{Details of proposed model layers}
 \end{figure}
-
 We also explored having the network learn the basis function for a
 spectral transform which is currently performed by the short-time
 Fourier Transform to compute the spectrogram which would allow our
 system to be a true end-to-end system where it would be fed only
 samples of audio. This is accomplished by multiple filter banks of a
 single one dimensional convolution
-layer in the network which would produce an output like the
+layer in the network at the input which would produce an output like the
 spectrogram but projecting a window of data from the audio waveform
 into a learned set of basis functions instead of sine and cosine waves.
 
@@ -323,13 +314,14 @@ trained using the Adam optimization algorithm using a learning rate of
 0.001 and a learning rate decay of 0.0001.
 
 Our models were developed in Python with the Keras framework running
-on the TensorFlow backend. Experiments were run on Google Cloud using
-the Deep Learning VM with an NVidia Tesla K80 GPU attached. The system
-could train a 2 million parameter model at approximately 500ms per
-step. This results in training our model with 3 conv2d layers and 2
-recurrent layers with batch normalization, dropout, and learning rate
-decay for 20 epochs in approximately 75 minutes. Code is available
-from GitHub: \url{https://github.com/tomkarpati/cs230.git}
+on a single the TensorFlow backend. Experiments were run on Google
+Cloud using the Deep Learning VM with an NVidia Tesla K80 GPU
+attached. The system could train a 2 million parameter model at
+approximately 500ms per step. This results in training our model with
+3 conv2d layers and 2 recurrent layers with batch normalization,
+dropout, and learning rate decay for 20 epochs in approximately 75
+minutes. Code is available from GitHub:
+\url{https://github.com/tomkarpati/cs230.git}
 
 \section{Experiments/Results/Discussion}
 Our baseline model produced fairly decent results in line with our
@@ -343,50 +335,37 @@ in the simple case. The 1D convolutional model was tuned to get an
 idea of the impact from different parameters.
 
 A summary of results of tuning the 1D convolutional baseline mode are
-outlined in table \cite{tab:summary_results}. The largest impact was
+outlined in table \cite{tab:summary-results}. The largest impact was
 provided by both an increase in the number of convolutional layers and
 the number of recurrent layers as expected. The training accuracy of
 the model increased from a single convolutional layer to 3
 convolutional layers and 1 lstm layer to 3 lstm layers. While the
 training accuracy of the model was fairly high, the model showed high
 variance as seen by the much lower accuracy number on the validation
-data. While dropout reduced the variance of the model, the accuracy on
-the training data did suffer as expected. A dropout keep rate of 0.7
+data without dropout. A dropout keep rate of 0.7
 produced good results, but a lower rate appeared to spread the
 features too much across the weights between the layers. For the 1D
-convolutional model, the larger kernel sizes produced better results
-than the smaller sizes. To counteract the noise in the loss functions
-as the loss converged to zero, we introduced learning rate decay to
-prevent us from overshooting as we converge on the loss. A value of
-0.0001 produced good results and resulted in reduced variance between
-the training and the validation data sets.
+convolutional model, the larger kernel sizes produced better
+results. To counteract the noise in the loss functions
+as the loss converged to zero, we introduced learning rate decay and a
+value of 0.0001 produced good results.
 
 Our two dimensional convolutional model was also tuned across the same
-lines. This results are also summarized in table
-\cite{tab:summary_results}. Again, increases in both the number of
-convolutional layers and the number of recurrent layers increased the
-accuracy of the results. Training speed was increased with batch
-normalization and variance reduced with dropout. Again a keep rate of
-0.7 produced good results for the dropout layers. Adding learning rate
-decay also produced better results in line with the observations with
-the one dimentional case. With the two
-dimensional convolutional layers, we noticed a decease in accuracy
-with the increase in 2D convolutional kernel sizes and
-strides. Increasing both of these did not result in any better
-results, and rather produced worse results for our
-network. Additionally, increases in the number of hidden nodes in our
-LSTM layers marginally increased our training accuracy, but this did
-not translate to any increase in our validation results indicating
-overfitting of our data with the increase in parameters that this
-resulted in. In addition, we also looked at effect of varying the FFT
-parameters that were used to feed the spectorgrams to the
-network. Decreasing the FFT length and window size over the values
-512, 256, 128, and 64 did not produce any better results as the FFT
-got smaller, however the number of parameters did get smaller
-resulting in a smaller and faster model computationally. The smaller
-FFT would also require less memory to store the samples for the FFT
-computation.
-
+lines (cite{tab:summary-results}). Again we increased layers to 3
+convolutional layers and 3 recurrent layers. Training speed was
+increased with batch normalization and variance reduced with dropout
+at a keep rate of 0.7. With the two dimensional convolutional layers,
+we noticed a decease in accuracy with the increase in 2D convolutional
+kernel sizes and strides. Additionally, increases in the number of
+hidden nodes in our LSTM layers marginally increased our training
+accuracy, but this did not translate to any increase in our validation
+results indicating overfitting of our data. In addition, we also
+looked at effect of varying the FFT parameters that were used to feed
+the spectorgrams to the network. Decreasing the FFT length and window
+size over the values 512, 256, 128, and 64 did not produce any better
+results as the FFT got smaller, however the number of parameters did
+get smaller resulting in a smaller and faster model
+computationally and less required memory.
 \begin{table}[!htbp]
   \resizebox{\textwidth}{!} {
     \begin{tabular} { |m{3cm}|c|c|c|c|c|m{3cm}|c|c|c|c| }
@@ -400,48 +379,47 @@ computation.
       Total & Trainable & Train & Validation \\ \hline
       \hline
       Baseline & 3 & 1 & 4 &
-      - & - & Batch Norm, Dropout = 0.5, FC (N = 128), Activation =
+      - & - & Dropout=0.5, FC (N=128), Activation =
       ELU, Global pooling &
       - & - & 0.8066 & 0.8073 \\ \hline
       \hline
       Keras Baseline & 3 & 1 & 4 &
-      - & - & Batch Norm, Dropout = 0.5, FC (N = 128), Activation =
+      - & - & Dropout=0.5, FC (N=128), Activation =
       ELU, Flattening &
       2,048K & 2,048K & 0.9805 & 0.0206 \\ \hline
       \hline
       Conv1d LSTM & 3 & 1 & 2 &
-      128 & 1 & Batch Norm, Dropout = 0.7, lr\_decay = 0.0001 &
+      128 & 1 & Dropout=0.7, lr\_decay=0.0001 &
       383K & 382K & 0.9005 & 0.9081 \\ \hline
       \hline
       conv2d LSTM & 3 & 1 & 3 &
-      128 & 3 & Batch Norm, Dropout = 0.7, lr\_decay = 0.0001 &
+      128 & 3 & Dropout=0.7, lr\_decay=0.0001 &
       1,439K & 1,437K & 0.9860 & 0.9459 \\ \hline
       \hline
       conv2d LSTM & 3 & 1 & 3 &
-      256 & 3 & Batch Norm, Dropout = 0.7, lr\_decay = 0.0001 &
+      256 & 3 & Dropout=0.7, lr\_decay=0.0001 &
       3,509K & 3,507K & 0.9875 & 0.9385 \\ \hline
       conv2d LSTM & 3 & 1 & 3 &
-      384 & 3 & Batch Norm, Dropout = 0.7, lr\_decay = 0.0001 &
+      384 & 3 & Dropout=0.7, lr\_decay=0.0001 &
       6,235K & 6,232K & 0.9892 & 0.9135 \\ \hline
       \hline
       conv2d LSTM & 3 & 1 & 3 &
-      128 & 3 & Batch Norm, Dropout = 0.7, lr\_decay = 0.0001,
-      fft\_length = 256, fft\_stride = 128 &
+      128 & 3 & Dropout=0.7, lr\_decay=0.0001,
+      fft\_length=256, fft\_stride=128 &
       914K & 913K & 0.9863 & 0.9029 \\ \hline
       conv2d LSTM & 3 & 1 & 3 &
-      128 & 3 & Batch Norm, Dropout = 0.7, lr\_decay = 0.0001,
-      fft\_length = 128, fft\_stride = 64 &
+      128 & 3 & Dropout=0.7, lr\_decay=0.0001,
+      fft\_length=128, fft\_stride=64 &
       652K & 651K & 0.9839 & 0.9319 \\ \hline
       conv2d LSTM & 3 & 1 & 3 &
-      128 & 3 & Batch Norm, Dropout = 0.7, lr\_decay = 0.0001,
-      fft\_length = 64, fft\_stride = 32 &
+      128 & 3 & Dropout=0.7, lr\_decay=0.0001,
+      fft\_length=64, fft\_stride=32 &
       521K & 520K & 0.9831 & 0.9272 \\ \hline
     \end{tabular}
   }
   \caption{Summary experimental results}
-  \label{tab:summary_results}
+  \label{tab:summary-results}
 \end{table}
-
 Finally, we attempted to have the network learn basis functions for
 the initial raw audio preprocessing. The addition of the one
 dimensional convolutional layer resulted in our model becoming
@@ -456,11 +434,10 @@ the loss functional effectively.
 
 \section{Conclusion/Future Work }
 We found that the our hybrid convolutional and recurrent network
-produced good results on our dataset but would be better suited to
-command detection in the real world than some of the other 2D
+produced good results on our dataset but we believe it would be better
+suited to command detection in the real world than some of the other 2D
 convolutional and fully connected networks that we had looked at due
-to the use of the unidirectional recurrent cells, but was able to
-produce good results with the aid of the 2D pooling layers to provide
+to the use of the unidirectional recurrent cells due to
 some invariance on both the time and frequency domains. Our attempts
 to learn new basis functions to replace the initial short-time fourier
 transform preprocessing step were unproductive. Additional work would
@@ -472,140 +449,6 @@ preprocessing step to differentiate any utterances from background
 noise to initially screen out background noise, and reduce the overall
 computation that the system performs over time, to just the time when
 the system can determine that it actually needs to be paying attention.
-
-\section{Supplemental Results}
-
-\begin{table}[!htbp]
-  \resizebox{\textwidth}{!} {
-    \begin{tabular} { |m{3cm}|c|c|c|c|c|m{3cm}|c|c|c|c| }
-      \hline
-      Architecture & \multicolumn{3}{|c|}{Convolutional Kernel} &
-      \multicolumn{2}{|c|}{Recurrent} & Other &
-      \multicolumn{2}{|c|}{Parameters} & \multicolumn{2}{|c|}{Accuracy} \\
-      \hline
-      & Size & Stride & \# Layers &
-      \# Cells & \# Layers & &
-      Total & Trainable & Train & Validation \\ \hline
-      \hline
-      Baseline & 3 & 1 & 4 &
-      - & - & Batch Norm, Dropout = 0.5, FC (N = 128), Activation =
-      ELU, Global pooling &
-      - & - & 0.8066 & 0.8073 \\ \hline
-      \hline
-      Keras Baseline & 3 & 1 & 4 &
-      - & - & Batch Norm, Dropout = 0.5, FC (N = 128), Activation =
-      ELU, Flattening &
-      2,048K & 2,048K & 0.9805 & 0.0206 \\ \hline
-      \hline
-      Conv1d LSTM & 3 & 1 & 1 &
-      128 & 1 & No Batch Norm, No Dropout &
-      88K & 88K & 0.7061 & 0.7651 \\ \hline
-      Conv1d LSTM & 3 & 1 & 2 &
-      128 & 2 & No Batch Norm, No Dropout &
-      219K & 219K & 0.7940 & 0.7924 \\ \hline
-      Conv1d LSTM & 3 & 1 & 1 &
-      128 & 1 & Batch Norm, No Dropout &
-      89K & 88K & 0.9482 & 0.8956 \\ \hline
-      Conv1d LSTM & 3 & 1 & 1 &
-      128 & 2 & Batch Norm, No Dropout &
-      221K & 220K & 0.9530 & 0.8726 \\ \hline
-      Conv1d LSTM & 3 & 1 & 2 &
-      128 & 1 & Batch Norm, No Dropout &
-      99K & 98K & 0.9497 & 0.9028 \\ \hline
-      Conv1d LSTM & 3 & 1 & 2 &
-      128 & 2 & Batch Norm, No Dropout &
-      231K & 230K & 0.9422 & 0.8850 \\ \hline
-      Conv1d LSTM & 3 & 1 & 3 &
-      128 & 3 & Batch Norm, No Dropout &
-      388K & 386K & 0.9610 & 0.8898 \\ \hline
-      \hline
-      Conv1d LSTM & 5 & 3 & 2 &
-      128 & 3 & Batch Norm, No Dropout &
-      374K & 373K & 0.9709 & 0.8945 \\ \hline
-      Conv1d LSTM & 7 & 3 & 2 &
-      128 & 3 & Batch Norm, No Dropout &
-      383K & 382K & 0.9706 & 0.8982 \\ \hline
-      Conv1d LSTM & 15 & 3 & 2 &
-      128 & 3 & Batch Norm, No Dropout &
-      421K & 419K & 0.9648 & 0.8942 \\ \hline
-      \hline
-      Conv1d LSTM & 3 & 1 & 2 &
-      128 & 1 & Batch Norm, Dropout = 0.5 &
-      100K & 99K & 0.9041 & 0.8470 \\ \hline
-      Conv1d LSTM & 3 & 1 & 2 &
-      128 & 1 & Batch Norm, Dropout = 0.7 &
-      100K & 99K & 0.9631 & 0.8923 \\ \hline
-      Conv1d LSTM & 3 & 1 & 3 &
-      128 & 3 & Batch Norm, Dropout = 0.5 &
-      388K & 386K & 0.9107 & 0.8395 \\ \hline
-      Conv1d LSTM & 3 & 1 & 3 &
-      128 & 3 & Batch Norm, Dropout = 0.7 &
-      388K & 386K & 0.9445 & 0.8480 \\ \hline
-      \hline
-      Conv1d LSTM & 7 & 3 & 2 &
-      128 & 3 & Batch Norm, Dropout = 0.7, lr\_decay = 0.0 &
-      383K & 382K & 0.8957 & 0.8953 \\ \hline
-      Conv1d LSTM & 7 & 3 & 2 &
-      128 & 3 & Batch Norm, Dropout = 0.7, lr\_decay = 0.001 &
-      383K & 382K & 0.8684 & 0.9060 \\ \hline
-      Conv1d LSTM & 3 & 1 & 2 &
-      128 & 1 & Batch Norm, Dropout = 0.7, lr\_decay = 0.0001 &
-      383K & 382K & 0.9005 & 0.9081 \\ \hline
-      \hline
-      conv2d LSTM & 3 & 1 & 2 &
-      128 & 1 & Batch Norm &
-      1,138K & 1,138K & 0.9822 & 0.8907 \\ \hline
-      conv2d LSTM & 3 & 1 & 3 &
-      128 & 2 & Batch Norm &
-      1,306K & 1,305K & 0.9862 & 0.9425 \\ \hline
-      conv2d LSTM & 3 & 1 & 3 &
-      128 & 3 & Batch Norm &
-      1,439K & 1,437K & 0.9822 & 0.9347 \\ \hline
-      \hline
-      conv2d LSTM & 3 & 1 & 3 &
-      128 & 3 & Batch Norm, Dropout = 0.7, lr\_decay = 0.0 &
-      1,439K & 1,437K & 0.9779 & 0.9525 \\ \hline
-      conv2d LSTM & 3 & 1 & 3 &
-      128 & 3 & Batch Norm, Dropout = 0.7, lr\_decay = 0.001 &
-      1,439K & 1,437K & 0.9824 & 0.8756 \\ \hline
-      conv2d LSTM & 3 & 1 & 3 &
-      128 & 3 & Batch Norm, Dropout = 0.7, lr\_decay = 0.0001 &
-      1,439K & 1,437K & 0.9860 & 0.9459 \\ \hline
-      \hline
-      conv2d LSTM & 5 & 3 & 3 &
-      128 & 3 & Batch Norm, Dropout = 0.7, lr\_decay = 0.0001 &
-      464K & 463K & 0.8308 & 0.8536 \\ \hline
-      conv2d LSTM & 7 & 3 & 3 &
-      128 & 3 & Batch Norm, Dropout = 0.7, lr\_decay = 0.0001 &
-      526K & 525K & 0.8737 & 0.8672 \\ \hline
-      \hline
-      conv2d LSTM & 3 & 1 & 3 &
-      256 & 3 & Batch Norm, Dropout = 0.7, lr\_decay = 0.0001 &
-      3,509K & 3,507K & 0.9875 & 0.9385 \\ \hline
-      conv2d LSTM & 3 & 1 & 3 &
-      384 & 3 & Batch Norm, Dropout = 0.7, lr\_decay = 0.0001 &
-      6,235K & 6,232K & 0.9892 & 0.9135 \\ \hline
-      \hline
-      conv2d LSTM & 3 & 1 & 3 &
-      128 & 3 & Batch Norm, Dropout = 0.7, lr\_decay = 0.0001,
-      fft\_length = 256, fft\_stride = 128 &
-      914K & 913K & 0.9863 & 0.9029 \\ \hline
-      conv2d LSTM & 3 & 1 & 3 &
-      128 & 3 & Batch Norm, Dropout = 0.7, lr\_decay = 0.0001,
-      fft\_length = 128, fft\_stride = 64 &
-      652K & 651K & 0.9839 & 0.9319 \\ \hline
-      conv2d LSTM & 3 & 1 & 3 &
-      128 & 3 & Batch Norm, Dropout = 0.7, lr\_decay = 0.0001,
-      fft\_length = 64, fft\_stride = 32 &
-      521K & 520K & 0.9831 & 0.9272 \\ \hline
-      
-    \end{tabular}
-  }
-  \caption{Full experimental results}
-  \label{tab:full_results}
-\end{table}
-Additional results are located in Table \ref{tab:full_results}
-
 
 \bibliography{cs230}{}
 \bibliographystyle{plain}
@@ -625,12 +468,12 @@ Additional results are located in Table \ref{tab:full_results}
       Total & Trainable & Train & Validation \\ \hline
       \hline
       Baseline & 3 & 1 & 4 &
-      - & - & Batch Norm, Dropout = 0.5, FC (N = 128), Activation =
+      - & - & Batch Norm, Dropout=0.5, FC (N=128), Activation =
       ELU, Global pooling &
       - & - & 0.8066 & 0.8073 \\ \hline
       \hline
       Keras Baseline & 3 & 1 & 4 &
-      - & - & Batch Norm, Dropout = 0.5, FC (N = 128), Activation =
+      - & - & Batch Norm, Dropout=0.5, FC (N=128), Activation =
       ELU, Flattening &
       2,048K & 2,048K & 0.9805 & 0.0206 \\ \hline
       \hline
@@ -667,26 +510,26 @@ Additional results are located in Table \ref{tab:full_results}
       421K & 419K & 0.9648 & 0.8942 \\ \hline
       \hline
       Conv1d LSTM & 3 & 1 & 2 &
-      128 & 1 & Batch Norm, Dropout = 0.5 &
+      128 & 1 & Batch Norm, Dropout=0.5 &
       100K & 99K & 0.9041 & 0.8470 \\ \hline
       Conv1d LSTM & 3 & 1 & 2 &
-      128 & 1 & Batch Norm, Dropout = 0.7 &
+      128 & 1 & Batch Norm, Dropout=0.7 &
       100K & 99K & 0.9631 & 0.8923 \\ \hline
       Conv1d LSTM & 3 & 1 & 3 &
-      128 & 3 & Batch Norm, Dropout = 0.5 &
+      128 & 3 & Batch Norm, Dropout=0.5 &
       388K & 386K & 0.9107 & 0.8395 \\ \hline
       Conv1d LSTM & 3 & 1 & 3 &
-      128 & 3 & Batch Norm, Dropout = 0.7 &
+      128 & 3 & Batch Norm, Dropout=0.7 &
       388K & 386K & 0.9445 & 0.8480 \\ \hline
       \hline
       Conv1d LSTM & 7 & 3 & 2 &
-      128 & 3 & Batch Norm, Dropout = 0.7, lr\_decay = 0.0 &
+      128 & 3 & Batch Norm, Dropout=0.7, lr\_decay=0.0 &
       383K & 382K & 0.8957 & 0.8953 \\ \hline
       Conv1d LSTM & 7 & 3 & 2 &
-      128 & 3 & Batch Norm, Dropout = 0.7, lr\_decay = 0.001 &
+      128 & 3 & Batch Norm, Dropout=0.7, lr\_decay=0.001 &
       383K & 382K & 0.8684 & 0.9060 \\ \hline
       Conv1d LSTM & 3 & 1 & 2 &
-      128 & 1 & Batch Norm, Dropout = 0.7, lr\_decay = 0.0001 &
+      128 & 1 & Batch Norm, Dropout=0.7, lr\_decay=0.0001 &
       383K & 382K & 0.9005 & 0.9081 \\ \hline
       \hline
       conv2d LSTM & 3 & 1 & 2 &
@@ -700,40 +543,40 @@ Additional results are located in Table \ref{tab:full_results}
       1,439K & 1,437K & 0.9822 & 0.9347 \\ \hline
       \hline
       conv2d LSTM & 3 & 1 & 3 &
-      128 & 3 & Batch Norm, Dropout = 0.7, lr\_decay = 0.0 &
+      128 & 3 & Batch Norm, Dropout=0.7, lr\_decay=0.0 &
       1,439K & 1,437K & 0.9779 & 0.9525 \\ \hline
       conv2d LSTM & 3 & 1 & 3 &
-      128 & 3 & Batch Norm, Dropout = 0.7, lr\_decay = 0.001 &
+      128 & 3 & Batch Norm, Dropout=0.7, lr\_decay=0.001 &
       1,439K & 1,437K & 0.9824 & 0.8756 \\ \hline
       conv2d LSTM & 3 & 1 & 3 &
-      128 & 3 & Batch Norm, Dropout = 0.7, lr\_decay = 0.0001 &
+      128 & 3 & Batch Norm, Dropout=0.7, lr\_decay=0.0001 &
       1,439K & 1,437K & 0.9860 & 0.9459 \\ \hline
       \hline
       conv2d LSTM & 5 & 3 & 3 &
-      128 & 3 & Batch Norm, Dropout = 0.7, lr\_decay = 0.0001 &
+      128 & 3 & Batch Norm, Dropout=0.7, lr\_decay=0.0001 &
       464K & 463K & 0.8308 & 0.8536 \\ \hline
       conv2d LSTM & 7 & 3 & 3 &
-      128 & 3 & Batch Norm, Dropout = 0.7, lr\_decay = 0.0001 &
+      128 & 3 & Batch Norm, Dropout=0.7, lr\_decay=0.0001 &
       526K & 525K & 0.8737 & 0.8672 \\ \hline
       \hline
       conv2d LSTM & 3 & 1 & 3 &
-      256 & 3 & Batch Norm, Dropout = 0.7, lr\_decay = 0.0001 &
+      256 & 3 & Batch Norm, Dropout=0.7, lr\_decay=0.0001 &
       3,509K & 3,507K & 0.9875 & 0.9385 \\ \hline
       conv2d LSTM & 3 & 1 & 3 &
-      384 & 3 & Batch Norm, Dropout = 0.7, lr\_decay = 0.0001 &
+      384 & 3 & Batch Norm, Dropout=0.7, lr\_decay=0.0001 &
       6,235K & 6,232K & 0.9892 & 0.9135 \\ \hline
       \hline
       conv2d LSTM & 3 & 1 & 3 &
-      128 & 3 & Batch Norm, Dropout = 0.7, lr\_decay = 0.0001,
-      fft\_length = 256, fft\_stride = 128 &
+      128 & 3 & Batch Norm, Dropout=0.7, lr\_decay=0.0001,
+      fft\_length=256, fft\_stride=128 &
       914K & 913K & 0.9863 & 0.9029 \\ \hline
       conv2d LSTM & 3 & 1 & 3 &
-      128 & 3 & Batch Norm, Dropout = 0.7, lr\_decay = 0.0001,
-      fft\_length = 128, fft\_stride = 64 &
+      128 & 3 & Batch Norm, Dropout=0.7, lr\_decay=0.0001,
+      fft\_length=128, fft\_stride=64 &
       652K & 651K & 0.9839 & 0.9319 \\ \hline
       conv2d LSTM & 3 & 1 & 3 &
-      128 & 3 & Batch Norm, Dropout = 0.7, lr\_decay = 0.0001,
-      fft\_length = 64, fft\_stride = 32 &
+      128 & 3 & Batch Norm, Dropout=0.7, lr\_decay=0.0001,
+      fft\_length=64, fft\_stride=32 &
       521K & 520K & 0.9831 & 0.9272 \\ \hline
       
     \end{tabular}
